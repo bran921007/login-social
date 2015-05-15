@@ -4,8 +4,8 @@ return array(
     "providers" => array (
         "Twitter" => array (
             "enabled" => true,
-            "keys" => array ("key" => "CONSUMER_KEY",
-                "secret" => "CONSUMER_SECRET")
+            "keys" => array ("key" => "YDOtka37rcFl7Z3G5OdLA",
+                "secret" => "k7BzOFn4Bv2h8qoBDCrhB7Suuz7SUui96nMrMHDXdw")
         )
     )
 );
