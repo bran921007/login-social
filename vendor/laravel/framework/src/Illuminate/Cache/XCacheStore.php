@@ -1,8 +1,6 @@
 <?php namespace Illuminate\Cache;
 
-use Illuminate\Contracts\Cache\Store;
-
-class XCacheStore extends TaggableStore implements Store {
+class XCacheStore extends TaggableStore implements StoreInterface {
 
 	/**
 	 * A string that should be prepended to keys.
@@ -91,11 +89,11 @@ class XCacheStore extends TaggableStore implements Store {
 	 * Remove an item from the cache.
 	 *
 	 * @param  string  $key
-	 * @return bool
+	 * @return void
 	 */
 	public function forget($key)
 	{
-		return xcache_unset($this->prefix.$key);
+		xcache_unset($this->prefix.$key);
 	}
 
 	/**

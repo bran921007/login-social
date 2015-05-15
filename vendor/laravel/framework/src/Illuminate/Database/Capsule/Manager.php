@@ -1,9 +1,10 @@
 <?php namespace Illuminate\Database\Capsule;
 
 use PDO;
+use Illuminate\Events\Dispatcher;
+use Illuminate\Cache\CacheManager;
 use Illuminate\Container\Container;
 use Illuminate\Database\DatabaseManager;
-use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Database\Eloquent\Model as Eloquent;
 use Illuminate\Database\Connectors\ConnectionFactory;
 use Illuminate\Support\Traits\CapsuleManagerTrait;
@@ -27,7 +28,7 @@ class Manager {
 	 */
 	public function __construct(Container $container = null)
 	{
-		$this->setupContainer($container ?: new Container);
+		$this->setupContainer($container);
 
 		// Once we have the container setup, we will setup the default configuration
 		// options in the container "config" binding. This will make the database
@@ -166,7 +167,7 @@ class Manager {
 	/**
 	 * Get the current event dispatcher instance.
 	 *
-	 * @return \Illuminate\Contracts\Events\Dispatcher
+	 * @return \Illuminate\Events\Dispatcher
 	 */
 	public function getEventDispatcher()
 	{
@@ -179,12 +180,36 @@ class Manager {
 	/**
 	 * Set the event dispatcher instance to be used by connections.
 	 *
-	 * @param  \Illuminate\Contracts\Events\Dispatcher  $dispatcher
+	 * @param  \Illuminate\Events\Dispatcher  $dispatcher
 	 * @return void
 	 */
 	public function setEventDispatcher(Dispatcher $dispatcher)
 	{
 		$this->container->instance('events', $dispatcher);
+	}
+
+	/**
+	 * Get the current cache manager instance.
+	 *
+	 * @return \Illuminate\Cache\CacheManager
+	 */
+	public function getCacheManager()
+	{
+		if ($this->container->bound('cache'))
+		{
+			return $this->container['cache'];
+		}
+	}
+
+	/**
+	 * Set the cache manager to be used by connections.
+	 *
+	 * @param  \Illuminate\Cache\CacheManager  $cache
+	 * @return void
+	 */
+	public function setCacheManager(CacheManager $cache)
+	{
+		$this->container->instance('cache', $cache);
 	}
 
 	/**

@@ -11,8 +11,11 @@
 
 namespace Symfony\Component\HttpFoundation\Tests\File\MimeType;
 
+use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\File\MimeType\MimeTypeGuesser;
 use Symfony\Component\HttpFoundation\File\MimeType\FileBinaryMimeTypeGuesser;
+use Symfony\Component\HttpFoundation\File\Exception\FileNotFoundException;
+use Symfony\Component\HttpFoundation\File\Exception\AccessDeniedException;
 
 class MimeTypeTest extends \PHPUnit_Framework_TestCase
 {
@@ -71,11 +74,11 @@ class MimeTypeTest extends \PHPUnit_Framework_TestCase
 
     public function testGuessWithNonReadablePath()
     {
-        if ('\\' === DIRECTORY_SEPARATOR) {
+        if (defined('PHP_WINDOWS_VERSION_BUILD')) {
             $this->markTestSkipped('Can not verify chmod operations on Windows');
         }
 
-        if ('root' === get_current_user()) {
+        if (in_array(get_current_user(), array('root'))) {
             $this->markTestSkipped('This test will fail if run under superuser');
         }
 

@@ -1,24 +1,21 @@
 <?php namespace Illuminate\Cache;
 
-use Exception;
-use LogicException;
-use Illuminate\Contracts\Cache\Store;
-use Illuminate\Database\ConnectionInterface;
-use Illuminate\Contracts\Encryption\Encrypter as EncrypterContract;
+use Illuminate\Database\Connection;
+use Illuminate\Encryption\Encrypter;
 
-class DatabaseStore implements Store {
+class DatabaseStore implements StoreInterface {
 
 	/**
 	 * The database connection instance.
 	 *
-	 * @var \Illuminate\Database\ConnectionInterface
+	 * @var \Illuminate\Database\Connection
 	 */
 	protected $connection;
 
 	/**
 	 * The encrypter instance.
 	 *
-	 * @var \Illuminate\Contracts\Encryption\Encrypter
+	 * @var \Illuminate\Encryption\Encrypter
 	 */
 	protected $encrypter;
 
@@ -39,13 +36,13 @@ class DatabaseStore implements Store {
 	/**
 	 * Create a new database store.
 	 *
-	 * @param  \Illuminate\Database\ConnectionInterface  $connection
-	 * @param  \Illuminate\Contracts\Encryption\Encrypter  $encrypter
+	 * @param  \Illuminate\Database\Connection  $connection
+	 * @param  \Illuminate\Encryption\Encrypter  $encrypter
 	 * @param  string  $table
 	 * @param  string  $prefix
 	 * @return void
 	 */
-	public function __construct(ConnectionInterface $connection, EncrypterContract $encrypter, $table, $prefix = '')
+	public function __construct(Connection $connection, Encrypter $encrypter, $table, $prefix = '')
 	{
 		$this->table = $table;
 		$this->prefix = $prefix;
@@ -76,7 +73,7 @@ class DatabaseStore implements Store {
 			{
 				$this->forget($key);
 
-				return;
+				return null;
 			}
 
 			return $this->encrypter->decrypt($cache->value);
@@ -106,7 +103,7 @@ class DatabaseStore implements Store {
 		{
 			$this->table()->insert(compact('key', 'value', 'expiration'));
 		}
-		catch (Exception $e)
+		catch (\Exception $e)
 		{
 			$this->table()->where('key', '=', $key)->update(compact('value', 'expiration'));
 		}
@@ -123,7 +120,7 @@ class DatabaseStore implements Store {
 	 */
 	public function increment($key, $value = 1)
 	{
-		throw new LogicException("Increment operations not supported by this driver.");
+		throw new \LogicException("Increment operations not supported by this driver.");
 	}
 
 	/**
@@ -137,7 +134,7 @@ class DatabaseStore implements Store {
 	 */
 	public function decrement($key, $value = 1)
 	{
-		throw new LogicException("Decrement operations not supported by this driver.");
+		throw new \LogicException("Decrement operations not supported by this driver.");
 	}
 
 	/**
@@ -159,20 +156,18 @@ class DatabaseStore implements Store {
 	 */
 	public function forever($key, $value)
 	{
-		$this->put($key, $value, 5256000);
+		return $this->put($key, $value, 5256000);
 	}
 
 	/**
 	 * Remove an item from the cache.
 	 *
 	 * @param  string  $key
-	 * @return bool
+	 * @return void
 	 */
 	public function forget($key)
 	{
 		$this->table()->where('key', '=', $this->prefix.$key)->delete();
-
-		return true;
 	}
 
 	/**
@@ -198,7 +193,7 @@ class DatabaseStore implements Store {
 	/**
 	 * Get the underlying database connection.
 	 *
-	 * @return \Illuminate\Database\ConnectionInterface
+	 * @return \Illuminate\Database\Connection
 	 */
 	public function getConnection()
 	{
@@ -208,7 +203,7 @@ class DatabaseStore implements Store {
 	/**
 	 * Get the encrypter instance.
 	 *
-	 * @return \Illuminate\Contracts\Encryption\Encrypter
+	 * @return \Illuminate\Encryption\Encrypter
 	 */
 	public function getEncrypter()
 	{

@@ -1,10 +1,24 @@
-<?php namespace {{namespace}};
+<?php{{namespace}}
 
-use {{rootNamespace}}Commands\Command;
+use Illuminate\Console\Command;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Input\InputArgument;
 
-use Illuminate\Contracts\Bus\SelfHandling;
+class {{class}} extends Command {
 
-class {{class}} extends Command implements SelfHandling {
+	/**
+	 * The console command name.
+	 *
+	 * @var string
+	 */
+	protected $name = 'command:name';
+
+	/**
+	 * The console command description.
+	 *
+	 * @var string
+	 */
+	protected $description = 'Command description.';
 
 	/**
 	 * Create a new command instance.
@@ -13,17 +27,41 @@ class {{class}} extends Command implements SelfHandling {
 	 */
 	public function __construct()
 	{
+		parent::__construct();
+	}
+
+	/**
+	 * Execute the console command.
+	 *
+	 * @return mixed
+	 */
+	public function fire()
+	{
 		//
 	}
 
 	/**
-	 * Execute the command.
+	 * Get the console command arguments.
 	 *
-	 * @return void
+	 * @return array
 	 */
-	public function handle()
+	protected function getArguments()
 	{
-		//
+		return array(
+			array('example', InputArgument::REQUIRED, 'An example argument.'),
+		);
+	}
+
+	/**
+	 * Get the console command options.
+	 *
+	 * @return array
+	 */
+	protected function getOptions()
+	{
+		return array(
+			array('example', null, InputOption::VALUE_OPTIONAL, 'An example option.', null),
+		);
 	}
 
 }

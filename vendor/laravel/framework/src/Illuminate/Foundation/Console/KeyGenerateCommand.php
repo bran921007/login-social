@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Str;
 use Illuminate\Console\Command;
-use Symfony\Component\Console\Input\InputOption;
+use Illuminate\Filesystem\Filesystem;
 
 class KeyGenerateCommand extends Command {
 
@@ -21,31 +21,50 @@ class KeyGenerateCommand extends Command {
 	protected $description = "Set the application key";
 
 	/**
+	 * Create a new key generator command.
+	 *
+	 * @param  \Illuminate\Filesystem\Filesystem  $files
+	 * @return void
+	 */
+	public function __construct(Filesystem $files)
+	{
+		parent::__construct();
+
+		$this->files = $files;
+	}
+
+	/**
 	 * Execute the console command.
 	 *
 	 * @return void
 	 */
 	public function fire()
 	{
+		list($path, $contents) = $this->getKeyFile();
+
 		$key = $this->getRandomKey();
 
-		if ($this->option('show'))
-		{
-			return $this->line('<comment>'.$key.'</comment>');
-		}
+		$contents = str_replace($this->laravel['config']['app.key'], $key, $contents);
 
-		$path = base_path('.env');
-
-		if (file_exists($path))
-		{
-			file_put_contents($path, str_replace(
-				$this->laravel['config']['app.key'], $key, file_get_contents($path)
-			));
-		}
+		$this->files->put($path, $contents);
 
 		$this->laravel['config']['app.key'] = $key;
 
 		$this->info("Application key [$key] set successfully.");
+	}
+
+	/**
+	 * Get the key file and contents.
+	 *
+	 * @return array
+	 */
+	protected function getKeyFile()
+	{
+		$env = $this->option('env') ? $this->option('env').'/' : '';
+
+		$contents = $this->files->get($path = $this->laravel['path']."/config/{$env}app.php");
+
+		return array($path, $contents);
 	}
 
 	/**
@@ -56,18 +75,6 @@ class KeyGenerateCommand extends Command {
 	protected function getRandomKey()
 	{
 		return Str::random(32);
-	}
-
-	/**
-	 * Get the console command options.
-	 *
-	 * @return array
-	 */
-	protected function getOptions()
-	{
-		return array(
-			array('show', null, InputOption::VALUE_NONE, 'Simply display the key instead of modifying files.'),
-		);
 	}
 
 }

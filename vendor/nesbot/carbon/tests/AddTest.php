@@ -58,27 +58,6 @@ class AddTest extends TestFixture
         $this->assertSame(3, Carbon::createFromDate(2012, 1, 31)->addMonth()->month);
     }
 
-    public function testAddMonthsNoOverflowPositive()
-    {
-        $this->assertSame('2012-02-29', Carbon::createFromDate(2012, 1, 31)->addMonthNoOverflow()->toDateString());
-        $this->assertSame('2012-03-31', Carbon::createFromDate(2012, 1, 31)->addMonthsNoOverflow(2)->toDateString());
-        $this->assertSame('2012-03-29', Carbon::createFromDate(2012, 2, 29)->addMonthNoOverflow()->toDateString());
-        $this->assertSame('2012-02-29', Carbon::createFromDate(2011, 12, 31)->addMonthsNoOverflow(2)->toDateString());
-    }
-
-    public function testAddMonthsNoOverflowZero()
-    {
-        $this->assertSame(12, Carbon::createFromDate(1975, 12)->addMonths(0)->month);
-    }
-
-    public function testAddMonthsNoOverflowNegative()
-    {
-        $this->assertSame('2012-01-29', Carbon::createFromDate(2012, 2, 29)->addMonthsNoOverflow(-1)->toDateString());
-        $this->assertSame('2012-01-31', Carbon::createFromDate(2012, 3, 31)->addMonthsNoOverflow(-2)->toDateString());
-        $this->assertSame('2012-02-29', Carbon::createFromDate(2012, 3, 31)->addMonthsNoOverflow(-1)->toDateString());
-        $this->assertSame('2011-12-31', Carbon::createFromDate(2012, 1, 31)->addMonthsNoOverflow(-1)->toDateString());
-    }
-
     public function testAddDaysPositive()
     {
         $this->assertSame(1, Carbon::createFromDate(1975, 5, 31)->addDays(1)->day);
@@ -197,45 +176,5 @@ class AddTest extends TestFixture
     public function testAddSecond()
     {
         $this->assertSame(1, Carbon::createFromTime(0, 0, 0)->addSecond()->second);
-    }
-
-    /***** Test non plural methods with non default args *****/
-
-    public function testAddYearPassingArg()
-    {
-        $this->assertSame(1977, Carbon::createFromDate(1975)->addYear(2)->year);
-    }
-
-    public function testAddMonthPassingArg()
-    {
-        $this->assertSame(7, Carbon::createFromDate(1975, 5, 1)->addMonth(2)->month);
-    }
-
-    public function testAddMonthNoOverflowPassingArg()
-    {
-        $dt = Carbon::createFromDate(2010, 12, 31)->addMonthNoOverflow(2);
-        $this->assertSame(2011, $dt->year);
-        $this->assertSame(2, $dt->month);
-        $this->assertSame(28, $dt->day);
-    }
-
-    public function testAddDayPassingArg()
-    {
-        $this->assertSame(12, Carbon::createFromDate(1975, 5, 10)->addDay(2)->day);
-    }
-
-    public function testAddHourPassingArg()
-    {
-        $this->assertSame(2, Carbon::createFromTime(0)->addHour(2)->hour);
-    }
-
-    public function testAddMinutePassingArg()
-    {
-        $this->assertSame(2, Carbon::createFromTime(0)->addMinute(2)->minute);
-    }
-
-    public function testAddSecondPassingArg()
-    {
-        $this->assertSame(2, Carbon::createFromTime(0)->addSecond(2)->second);
     }
 }

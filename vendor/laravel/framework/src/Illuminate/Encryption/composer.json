@@ -1,12 +1,6 @@
 {
     "name": "illuminate/encryption",
-    "description": "The Illuminate Encryption package.",
     "license": "MIT",
-    "homepage": "http://laravel.com",
-    "support": {
-        "issues": "https://github.com/laravel/framework/issues",
-        "source": "https://github.com/laravel/framework"
-    },
     "authors": [
         {
             "name": "Taylor Otwell",
@@ -15,19 +9,18 @@
     ],
     "require": {
         "php": ">=5.4.0",
-        "ext-openssl": "*",
-        "illuminate/contracts": "5.0.*",
-        "illuminate/support": "5.0.*",
-        "symfony/security-core": "2.6.*"
+        "illuminate/support": "4.2.*",
+        "symfony/security-core": "2.5.*"
     },
     "autoload": {
-        "psr-4": {
-            "Illuminate\\Encryption\\": ""
+        "psr-0": {
+            "Illuminate\\Encryption": ""
         }
     },
+    "target-dir": "Illuminate/Encryption",
     "extra": {
         "branch-alias": {
-            "dev-master": "5.0-dev"
+            "dev-master": "4.2-dev"
         }
     },
     "minimum-stability": "dev"

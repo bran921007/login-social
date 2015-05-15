@@ -1,11 +1,10 @@
 <?php namespace Illuminate\Http;
 
 use ArrayObject;
-use Illuminate\Contracts\Support\Jsonable;
-use Illuminate\Contracts\Support\Renderable;
-use Symfony\Component\HttpFoundation\Response as BaseResponse;
+use Illuminate\Support\Contracts\JsonableInterface;
+use Illuminate\Support\Contracts\RenderableInterface;
 
-class Response extends BaseResponse {
+class Response extends \Symfony\Component\HttpFoundation\Response {
 
 	use ResponseTrait;
 
@@ -31,15 +30,15 @@ class Response extends BaseResponse {
 		// from routes that will be automatically transformed to their JSON form.
 		if ($this->shouldBeJson($content))
 		{
-			$this->header('Content-Type', 'application/json');
+			$this->headers->set('Content-Type', 'application/json');
 
 			$content = $this->morphToJson($content);
 		}
 
-		// If this content implements the "Renderable" interface then we will call the
+		// If this content implements the "RenderableInterface", then we will call the
 		// render method on the object so we will avoid any "__toString" exceptions
 		// that might be thrown and have their errors obscured by PHP's handling.
-		elseif ($content instanceof Renderable)
+		elseif ($content instanceof RenderableInterface)
 		{
 			$content = $content->render();
 		}
@@ -55,7 +54,7 @@ class Response extends BaseResponse {
 	 */
 	protected function morphToJson($content)
 	{
-		if ($content instanceof Jsonable) return $content->toJson();
+		if ($content instanceof JsonableInterface) return $content->toJson();
 
 		return json_encode($content);
 	}
@@ -68,7 +67,7 @@ class Response extends BaseResponse {
 	 */
 	protected function shouldBeJson($content)
 	{
-		return $content instanceof Jsonable ||
+		return $content instanceof JsonableInterface ||
 			   $content instanceof ArrayObject ||
 			   is_array($content);
 	}

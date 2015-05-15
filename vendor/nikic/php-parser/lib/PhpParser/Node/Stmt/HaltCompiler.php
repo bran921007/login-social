@@ -1,14 +1,10 @@
 <?php
 
-namespace PhpParser\Node\Stmt;
-
-use PhpParser\Node\Stmt;
-
-class HaltCompiler extends Stmt
+/**
+ * @property string $remaining Remaining text after halt compiler statement.
+ */
+class PHPParser_Node_Stmt_HaltCompiler extends PHPParser_Node_Stmt
 {
-    /** @var string Remaining text after halt compiler statement. */
-    public $remaining;
-
     /**
      * Constructs a __halt_compiler node.
      *
@@ -16,11 +12,11 @@ class HaltCompiler extends Stmt
      * @param array  $attributes Additional attributes
      */
     public function __construct($remaining, array $attributes = array()) {
-        parent::__construct(null, $attributes);
-        $this->remaining = $remaining;
-    }
-
-    public function getSubNodeNames() {
-        return array('remaining');
+        parent::__construct(
+            array(
+                'remaining' => $remaining,
+            ),
+            $attributes
+        );
     }
 }

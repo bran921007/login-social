@@ -33,13 +33,6 @@ abstract class Job {
 	protected $deleted = false;
 
 	/**
-	 * Indicates if the job has been released.
-	 *
-	 * @var bool
-	 */
-	protected $released = false;
-
-	/**
 	 * Fire the job.
 	 *
 	 * @return void
@@ -72,30 +65,7 @@ abstract class Job {
 	 * @param  int   $delay
 	 * @return void
 	 */
-	public function release($delay = 0)
-	{
-		$this->released = true;
-	}
-
-	/**
-	 * Determine if the job was released back into the queue.
-	 *
-	 * @return bool
-	 */
-	public function isReleased()
-	{
-		return $this->released;
-	}
-
-	/**
-	 * Determine if the job has been deleted or released.
-	 *
-	 * @return bool
-	 */
-	public function isDeletedOrReleased()
-	{
-		return $this->isDeleted() || $this->isReleased();
-	}
+	abstract public function release($delay = 0);
 
 	/**
 	 * Get the number of times the job has been attempted.
@@ -123,7 +93,18 @@ abstract class Job {
 
 		$this->instance = $this->resolve($class);
 
-		$this->instance->{$method}($this, $this->resolveQueueableEntities($payload['data']));
+		$this->instance->{$method}($this, $payload['data']);
+	}
+
+	/**
+	 * Resolve the given job handler.
+	 *
+	 * @param  string  $class
+	 * @return mixed
+	 */
+	protected function resolve($class)
+	{
+		return $this->container->make($class);
 	}
 
 	/**
@@ -140,82 +121,13 @@ abstract class Job {
 	}
 
 	/**
-	 * Resolve the given job handler.
+	 * Determine if job should be auto-deleted.
 	 *
-	 * @param  string  $class
-	 * @return mixed
+	 * @return bool
 	 */
-	protected function resolve($class)
+	public function autoDelete()
 	{
-		return $this->container->make($class);
-	}
-
-	/**
-	 * Resolve all of the queueable entities in the given payload.
-	 *
-	 * @param  mixed  $data
-	 * @return mixed
-	 */
-	protected function resolveQueueableEntities($data)
-	{
-		if (is_string($data))
-		{
-			return $this->resolveQueueableEntity($data);
-		}
-
-		if (is_array($data))
-		{
-			array_walk($data, function(&$d) { $d = $this->resolveQueueableEntity($d); });
-		}
-
-		return $data;
-	}
-
-	/**
-	 * Resolve a single queueable entity from the resolver.
-	 *
-	 * @param  mixed  $value
-	 * @return \Illuminate\Contracts\Queue\QueueableEntity
-	 */
-	protected function resolveQueueableEntity($value)
-	{
-		if (is_string($value) && starts_with($value, '::entity::'))
-		{
-			list($marker, $type, $id) = explode('|', $value, 3);
-
-			return $this->getEntityResolver()->resolve($type, $id);
-		}
-
-		return $value;
-	}
-
-	/**
-	 * Call the failed method on the job instance.
-	 *
-	 * @return void
-	 */
-	public function failed()
-	{
-		$payload = json_decode($this->getRawBody(), true);
-
-		list($class, $method) = $this->parseJob($payload['job']);
-
-		$this->instance = $this->resolve($class);
-
-		if (method_exists($this->instance, 'failed'))
-		{
-			$this->instance->failed($this->resolveQueueableEntities($payload['data']));
-		}
-	}
-
-	/**
-	 * Get an entity resolver instance.
-	 *
-	 * @return \Illuminate\Contracts\Queue\EntityResolver
-	 */
-	protected function getEntityResolver()
-	{
-		return $this->container->make('Illuminate\Contracts\Queue\EntityResolver');
+		return isset($this->instance->delete);
 	}
 
 	/**

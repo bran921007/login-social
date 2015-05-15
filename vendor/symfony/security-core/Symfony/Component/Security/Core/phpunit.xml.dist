@@ -11,9 +11,6 @@
          syntaxCheck="false"
          bootstrap="vendor/autoload.php"
 >
-    <php>
-        <ini name="error_reporting" value="-1" />
-    </php>
     <testsuites>
         <testsuite name="Symfony Security Component Core Test Suite">
             <directory>./Tests/</directory>

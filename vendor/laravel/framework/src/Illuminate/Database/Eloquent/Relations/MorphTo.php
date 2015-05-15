@@ -36,7 +36,7 @@ class MorphTo extends BelongsTo {
 	protected $withTrashed = false;
 
 	/**
-	 * Create a new morph to relationship instance.
+	 * Create a new belongs to relationship instance.
 	 *
 	 * @param  \Illuminate\Database\Eloquent\Builder  $query
 	 * @param  \Illuminate\Database\Eloquent\Model  $parent
@@ -51,18 +51,6 @@ class MorphTo extends BelongsTo {
 		$this->morphType = $type;
 
 		parent::__construct($query, $parent, $foreignKey, $otherKey, $relation);
-	}
-
-	/**
-	 * Get the results of the relationship.
-	 *
-	 * @return mixed
-	 */
-	public function getResults()
-	{
-		if ( ! $this->otherKey) return;
-
-		return $this->query->first();
 	}
 
 	/**
@@ -207,16 +195,6 @@ class MorphTo extends BelongsTo {
 	}
 
 	/**
-	 * Get the foreign key "type" name.
-	 *
-	 * @return string
-	 */
-	public function getMorphType()
-	{
-		return $this->morphType;
-	}
-
-	/**
 	 * Get the dictionary used by the relationship.
 	 *
 	 * @return array
@@ -227,7 +205,7 @@ class MorphTo extends BelongsTo {
 	}
 
 	/**
-	 * Fetch soft-deleted model instances with query.
+	 * Fetch soft-deleted model instances with query
 	 *
 	 * @return $this
 	 */
@@ -241,7 +219,7 @@ class MorphTo extends BelongsTo {
 	}
 
 	/**
-	 * Return trashed models with query if told so.
+	 * Return trashed models with query if told so
 	 *
 	 * @param  \Illuminate\Database\Eloquent\Builder  $query
 	 * @return \Illuminate\Database\Eloquent\Builder
@@ -252,7 +230,6 @@ class MorphTo extends BelongsTo {
 		{
 			return $query->withTrashed();
 		}
-
 		return $query;
 	}
 

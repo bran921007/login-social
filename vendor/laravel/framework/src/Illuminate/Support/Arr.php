@@ -1,10 +1,11 @@
 <?php namespace Illuminate\Support;
 
-use Illuminate\Support\Traits\Macroable;
+use Closure;
+use Illuminate\Support\Traits\MacroableTrait;
 
 class Arr {
 
-	use Macroable;
+	use MacroableTrait;
 
 	/**
 	 * Add an element to an array using "dot" notation if it doesn't exist.
@@ -27,39 +28,19 @@ class Arr {
 	/**
 	 * Build a new array using a callback.
 	 *
-	 * @param  array  $array
-	 * @param  callable  $callback
+	 * @param  array     $array
+	 * @param  \Closure  $callback
 	 * @return array
 	 */
-	public static function build($array, callable $callback)
+	public static function build($array, Closure $callback)
 	{
-		$results = [];
+		$results = array();
 
 		foreach ($array as $key => $value)
 		{
 			list($innerKey, $innerValue) = call_user_func($callback, $key, $value);
 
 			$results[$innerKey] = $innerValue;
-		}
-
-		return $results;
-	}
-
-	/**
-	 * Collapse an array of arrays into a single array.
-	 *
-	 * @param  array|\ArrayAccess  $array
-	 * @return array
-	 */
-	public static function collapse($array)
-	{
-		$results = [];
-
-		foreach ($array as $values)
-		{
-			if ($values instanceof Collection) $values = $values->all();
-
-			$results = array_merge($results, $values);
 		}
 
 		return $results;
@@ -73,7 +54,7 @@ class Arr {
 	 */
 	public static function divide($array)
 	{
-		return [array_keys($array), array_values($array)];
+		return array(array_keys($array), array_values($array));
 	}
 
 	/**
@@ -85,7 +66,7 @@ class Arr {
 	 */
 	public static function dot($array, $prepend = '')
 	{
-		$results = [];
+		$results = array();
 
 		foreach ($array as $key => $value)
 		{
@@ -111,9 +92,7 @@ class Arr {
 	 */
 	public static function except($array, $keys)
 	{
-		static::forget($array, $keys);
-
-		return $array;
+		return array_diff_key($array, array_flip((array) $keys));
 	}
 
 	/**
@@ -127,14 +106,13 @@ class Arr {
 	{
 		foreach (explode('.', $key) as $segment)
 		{
-			$results = [];
+			$results = array();
 
 			foreach ($array as $value)
 			{
-				if (array_key_exists($segment, $value = (array) $value))
-				{
-					$results[] = $value[$segment];
-				}
+				$value = (array) $value;
+
+				$results[] = $value[$segment];
 			}
 
 			$array = array_values($results);
@@ -146,12 +124,12 @@ class Arr {
 	/**
 	 * Return the first element in an array passing a given truth test.
 	 *
-	 * @param  array  $array
-	 * @param  callable  $callback
-	 * @param  mixed  $default
+	 * @param  array     $array
+	 * @param  \Closure  $callback
+	 * @param  mixed     $default
 	 * @return mixed
 	 */
-	public static function first($array, callable $callback, $default = null)
+	public static function first($array, $callback, $default = null)
 	{
 		foreach ($array as $key => $value)
 		{
@@ -164,12 +142,12 @@ class Arr {
 	/**
 	 * Return the last element in an array passing a given truth test.
 	 *
-	 * @param  array  $array
-	 * @param  callable  $callback
-	 * @param  mixed  $default
+	 * @param  array     $array
+	 * @param  \Closure  $callback
+	 * @param  mixed     $default
 	 * @return mixed
 	 */
-	public static function last($array, callable $callback, $default = null)
+	public static function last($array, $callback, $default = null)
 	{
 		return static::first(array_reverse($array), $callback, $default);
 	}
@@ -182,7 +160,7 @@ class Arr {
 	 */
 	public static function flatten($array)
 	{
-		$return = [];
+		$return = array();
 
 		array_walk_recursive($array, function($x) use (&$return) { $return[] = $x; });
 
@@ -249,32 +227,6 @@ class Arr {
 	}
 
 	/**
-	 * Check if an item exists in an array using "dot" notation.
-	 *
-	 * @param  array   $array
-	 * @param  string  $key
-	 * @return bool
-	 */
-	public static function has($array, $key)
-	{
-		if (empty($array) || is_null($key)) return false;
-
-		if (array_key_exists($key, $array)) return true;
-
-		foreach (explode('.', $key) as $segment)
-		{
-			if ( ! is_array($array) || ! array_key_exists($segment, $array))
-			{
-				return false;
-			}
-
-			$array = $array[$segment];
-		}
-
-		return true;
-	}
-
-	/**
 	 * Get a subset of the items from the given array.
 	 *
 	 * @param  array  $array
@@ -296,11 +248,11 @@ class Arr {
 	 */
 	public static function pluck($array, $value, $key = null)
 	{
-		$results = [];
+		$results = array();
 
 		foreach ($array as $item)
 		{
-			$itemValue = data_get($item, $value);
+			$itemValue = is_object($item) ? $item->{$value} : $item[$value];
 
 			// If the key is "null", we will just append the value to the array and keep
 			// looping. Otherwise we will key the array using the value of the key we
@@ -311,7 +263,7 @@ class Arr {
 			}
 			else
 			{
-				$itemKey = data_get($item, $key);
+				$itemKey = is_object($item) ? $item->{$key} : $item[$key];
 
 				$results[$itemKey] = $itemValue;
 			}
@@ -362,7 +314,7 @@ class Arr {
 			// values at the correct depth. Then we'll keep digging into the array.
 			if ( ! isset($array[$key]) || ! is_array($array[$key]))
 			{
-				$array[$key] = [];
+				$array[$key] = array();
 			}
 
 			$array =& $array[$key];
@@ -374,27 +326,27 @@ class Arr {
 	}
 
 	/**
-	 * Sort the array using the given callback.
+	 * Sort the array using the given Closure.
 	 *
-	 * @param  array  $array
-	 * @param  callable  $callback
+	 * @param  array     $array
+	 * @param  \Closure  $callback
 	 * @return array
 	 */
-	public static function sort($array, callable $callback)
+	public static function sort($array, Closure $callback)
 	{
 		return Collection::make($array)->sortBy($callback)->all();
 	}
 
 	/**
-	 * Filter the array using the given callback.
+	 * Filter the array using the given Closure.
 	 *
-	 * @param  array  $array
-	 * @param  callable  $callback
+	 * @param  array     $array
+	 * @param  \Closure  $callback
 	 * @return array
 	 */
-	public static function where($array, callable $callback)
+	public static function where($array, Closure $callback)
 	{
-		$filtered = [];
+		$filtered = array();
 
 		foreach ($array as $key => $value)
 		{

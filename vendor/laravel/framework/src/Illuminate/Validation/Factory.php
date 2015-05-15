@@ -1,11 +1,10 @@
 <?php namespace Illuminate\Validation;
 
 use Closure;
-use Illuminate\Contracts\Container\Container;
+use Illuminate\Container\Container;
 use Symfony\Component\Translation\TranslatorInterface;
-use Illuminate\Contracts\Validation\Factory as FactoryContract;
 
-class Factory implements FactoryContract {
+class Factory {
 
 	/**
 	 * The Translator implementation.
@@ -24,7 +23,7 @@ class Factory implements FactoryContract {
 	/**
 	 * The IoC container instance.
 	 *
-	 * @var \Illuminate\Contracts\Container\Container
+	 * @var \Illuminate\Container\Container
 	 */
 	protected $container;
 
@@ -67,7 +66,7 @@ class Factory implements FactoryContract {
 	 * Create a new Validator factory instance.
 	 *
 	 * @param  \Symfony\Component\Translation\TranslatorInterface  $translator
-	 * @param  \Illuminate\Contracts\Container\Container  $container
+	 * @param  \Illuminate\Container\Container  $container
 	 * @return void
 	 */
 	public function __construct(TranslatorInterface $translator, Container $container = null)

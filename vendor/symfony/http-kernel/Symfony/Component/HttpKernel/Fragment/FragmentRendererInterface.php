@@ -19,6 +19,8 @@ use Symfony\Component\HttpFoundation\Response;
  * Interface implemented by all rendering strategies.
  *
  * @author Fabien Potencier <fabien@symfony.com>
+ *
+ * @see Symfony\Component\HttpKernel\FragmentRenderer
  */
 interface FragmentRendererInterface
 {

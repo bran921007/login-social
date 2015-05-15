@@ -1,26 +1,22 @@
 <?php
 
-namespace PhpParser\Node\Expr;
-
-use PhpParser\Node\Expr;
-
-class ErrorSuppress extends Expr
+/**
+ * @property PHPParser_Node_Expr $expr Expression
+ */
+class PHPParser_Node_Expr_ErrorSuppress extends PHPParser_Node_Expr
 {
-    /** @var Expr Expression */
-    public $expr;
-
     /**
      * Constructs an error suppress node.
      *
-     * @param Expr  $expr       Expression
-     * @param array $attributes Additional attributes
+     * @param PHPParser_Node_Expr $expr       Expression
+     * @param array               $attributes Additional attributes
      */
-    public function __construct(Expr $expr, array $attributes = array()) {
-        parent::__construct(null, $attributes);
-        $this->expr = $expr;
-    }
-
-    public function getSubNodeNames() {
-        return array('expr');
+    public function __construct(PHPParser_Node_Expr $expr, array $attributes = array()) {
+        parent::__construct(
+            array(
+                'expr' => $expr
+            ),
+            $attributes
+        );
     }
 }

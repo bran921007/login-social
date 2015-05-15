@@ -70,9 +70,10 @@ class MorphPivot extends Pivot {
 	 */
 	public function setMorphClass($morphClass)
 	{
-		$this->morphClass = $morphClass;
+			$this->morphClass = $morphClass;
 
-		return $this;
+			return $this;
 	}
+
 
 }

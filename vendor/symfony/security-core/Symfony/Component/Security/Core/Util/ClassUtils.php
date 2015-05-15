@@ -11,13 +11,11 @@
 
 namespace Symfony\Component\Security\Core\Util;
 
-use Doctrine\Common\Util\ClassUtils as DoctrineClassUtils;
-
 /**
  * Class related functionality for objects that
  * might or might not be proxy objects at the moment.
  *
- * @see DoctrineClassUtils
+ * @see Doctrine\Common\Util\ClassUtils
  *
  * @author Benjamin Eberlei <kontakt@beberlei.de>
  * @author Johannes Schmitt <schmittjoh@gmail.com>
@@ -32,14 +30,14 @@ class ClassUtils
     const MARKER = '__CG__';
 
     /**
-     * Length of the proxy marker.
+     * Length of the proxy marker
      *
      * @var int
      */
     const MARKER_LENGTH = 6;
 
     /**
-     * This class should not be instantiated.
+     * This class should not be instantiated
      */
     private function __construct()
     {
@@ -48,8 +46,7 @@ class ClassUtils
     /**
      * Gets the real class name of a class name that could be a proxy.
      *
-     * @param string|object $object
-     *
+     * @param string|object
      * @return string
      */
     public static function getRealClass($object)

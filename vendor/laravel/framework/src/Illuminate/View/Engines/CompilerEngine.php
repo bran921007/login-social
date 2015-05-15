@@ -1,6 +1,5 @@
 <?php namespace Illuminate\View\Engines;
 
-use ErrorException;
 use Illuminate\View\Compilers\CompilerInterface;
 
 class CompilerEngine extends PhpEngine {
@@ -72,7 +71,7 @@ class CompilerEngine extends PhpEngine {
 	 */
 	protected function handleViewException($e, $obLevel)
 	{
-		$e = new ErrorException($this->getMessage($e), 0, 1, $e->getFile(), $e->getLine(), $e);
+		$e = new \ErrorException($this->getMessage($e), 0, 1, $e->getFile(), $e->getLine(), $e);
 
 		parent::handleViewException($e, $obLevel);
 	}

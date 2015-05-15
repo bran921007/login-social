@@ -1,26 +1,25 @@
 <?php namespace Illuminate\Database\Connectors;
 
 use PDO;
-use InvalidArgumentException;
+use Illuminate\Container\Container;
 use Illuminate\Database\MySqlConnection;
 use Illuminate\Database\SQLiteConnection;
 use Illuminate\Database\PostgresConnection;
 use Illuminate\Database\SqlServerConnection;
-use Illuminate\Contracts\Container\Container;
 
 class ConnectionFactory {
 
 	/**
 	 * The IoC container instance.
 	 *
-	 * @var \Illuminate\Contracts\Container\Container
+	 * @var \Illuminate\Container\Container
 	 */
 	protected $container;
 
 	/**
 	 * Create a new connection factory instance.
 	 *
-	 * @param  \Illuminate\Contracts\Container\Container  $container
+	 * @param  \Illuminate\Container\Container  $container
 	 * @return void
 	 */
 	public function __construct(Container $container)
@@ -165,7 +164,7 @@ class ConnectionFactory {
 	{
 		if ( ! isset($config['driver']))
 		{
-			throw new InvalidArgumentException("A driver must be specified.");
+			throw new \InvalidArgumentException("A driver must be specified.");
 		}
 
 		if ($this->container->bound($key = "db.connector.{$config['driver']}"))
@@ -188,7 +187,7 @@ class ConnectionFactory {
 				return new SqlServerConnector;
 		}
 
-		throw new InvalidArgumentException("Unsupported driver [{$config['driver']}]");
+		throw new \InvalidArgumentException("Unsupported driver [{$config['driver']}]");
 	}
 
 	/**
@@ -225,7 +224,7 @@ class ConnectionFactory {
 				return new SqlServerConnection($connection, $database, $prefix, $config);
 		}
 
-		throw new InvalidArgumentException("Unsupported driver [$driver]");
+		throw new \InvalidArgumentException("Unsupported driver [$driver]");
 	}
 
 }

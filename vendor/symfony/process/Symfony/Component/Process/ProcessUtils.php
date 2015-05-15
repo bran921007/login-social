@@ -23,7 +23,7 @@ use Symfony\Component\Process\Exception\InvalidArgumentException;
 class ProcessUtils
 {
     /**
-     * This class should not be instantiated.
+     * This class should not be instantiated
      */
     private function __construct()
     {
@@ -42,13 +42,13 @@ class ProcessUtils
         //Fix for PHP bug #49446 escapeshellarg doesn't work on Windows
         //@see https://bugs.php.net/bug.php?id=43784
         //@see https://bugs.php.net/bug.php?id=49446
-        if ('\\' === DIRECTORY_SEPARATOR) {
+        if (defined('PHP_WINDOWS_VERSION_BUILD')) {
             if ('' === $argument) {
                 return escapeshellarg($argument);
             }
 
             $escapedArgument = '';
-            $quote = false;
+            $quote =  false;
             foreach (preg_split('/(")/i', $argument, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE) as $part) {
                 if ('"' === $part) {
                     $escapedArgument .= '\\"';
@@ -75,7 +75,7 @@ class ProcessUtils
     }
 
     /**
-     * Validates and normalizes a Process input.
+     * Validates and normalizes a Process input
      *
      * @param string $caller The name of method call that validates the input
      * @param mixed  $input  The input to validate
@@ -87,9 +87,6 @@ class ProcessUtils
     public static function validateInput($caller, $input)
     {
         if (null !== $input) {
-            if (is_resource($input)) {
-                return $input;
-            }
             if (is_scalar($input)) {
                 return (string) $input;
             }
@@ -98,7 +95,7 @@ class ProcessUtils
                 return (string) $input;
             }
 
-            throw new InvalidArgumentException(sprintf('%s only accepts strings or stream resources.', $caller));
+            throw new InvalidArgumentException(sprintf('%s only accepts strings.', $caller));
         }
 
         return $input;

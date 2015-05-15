@@ -2,9 +2,8 @@
 
 use Aws\Sqs\SqsClient;
 use Illuminate\Queue\Jobs\SqsJob;
-use Illuminate\Contracts\Queue\Queue as QueueContract;
 
-class SqsQueue extends Queue implements QueueContract {
+class SqsQueue extends Queue implements QueueInterface {
 
 	/**
 	 * The Amazon SQS instance.
@@ -87,7 +86,7 @@ class SqsQueue extends Queue implements QueueContract {
 	 * Pop the next job off of the queue.
 	 *
 	 * @param  string  $queue
-	 * @return \Illuminate\Contracts\Queue\Job|null
+	 * @return \Illuminate\Queue\Jobs\Job|null
 	 */
 	public function pop($queue = null)
 	{

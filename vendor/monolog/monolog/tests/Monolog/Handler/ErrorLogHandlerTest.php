@@ -22,6 +22,7 @@ function error_log()
 
 class ErrorLogHandlerTest extends TestCase
 {
+
     protected function setUp()
     {
         $GLOBALS['error_log'] = array();

@@ -1,13 +1,6 @@
 <?php
 
-namespace PhpParser\Serializer;
-
-use XMLWriter;
-use PhpParser\Node;
-use PhpParser\Comment;
-use PhpParser\Serializer;
-
-class XML implements Serializer
+class PHPParser_Serializer_XML implements PHPParser_Serializer
 {
     protected $writer;
 
@@ -38,7 +31,7 @@ class XML implements Serializer
     }
 
     protected function _serialize($node) {
-        if ($node instanceof Node) {
+        if ($node instanceof PHPParser_Node) {
             $this->writer->startElement('node:' . $node->getType());
 
             foreach ($node->getAttributes() as $name => $value) {
@@ -54,10 +47,10 @@ class XML implements Serializer
             }
 
             $this->writer->endElement();
-        } elseif ($node instanceof Comment) {
+        } elseif ($node instanceof PHPParser_Comment) {
             $this->writer->startElement('comment');
-            $this->writer->writeAttribute('isDocComment', $node instanceof Comment\Doc ? 'true' : 'false');
-            $this->writer->writeAttribute('line', (string) $node->getLine());
+            $this->writer->writeAttribute('isDocComment', $node instanceof PHPParser_Comment_Doc ? 'true' : 'false');
+            $this->writer->writeAttribute('line', $node->getLine());
             $this->writer->text($node->getText());
             $this->writer->endElement();
         } elseif (is_array($node)) {
@@ -69,10 +62,9 @@ class XML implements Serializer
         } elseif (is_string($node)) {
             $this->writer->writeElement('scalar:string', $node);
         } elseif (is_int($node)) {
-            $this->writer->writeElement('scalar:int', (string) $node);
+            $this->writer->writeElement('scalar:int', $node);
         } elseif (is_float($node)) {
-            // TODO Higher precision conversion?
-            $this->writer->writeElement('scalar:float', (string) $node);
+            $this->writer->writeElement('scalar:float', $node);
         } elseif (true === $node) {
             $this->writer->writeElement('scalar:true');
         } elseif (false === $node) {
@@ -80,7 +72,7 @@ class XML implements Serializer
         } elseif (null === $node) {
             $this->writer->writeElement('scalar:null');
         } else {
-            throw new \InvalidArgumentException('Unexpected node type');
+            throw new InvalidArgumentException('Unexpected node type');
         }
     }
 }

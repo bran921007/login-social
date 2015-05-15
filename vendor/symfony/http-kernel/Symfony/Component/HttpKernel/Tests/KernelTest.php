@@ -11,8 +11,6 @@
 
 namespace Symfony\Component\HttpKernel\Tests;
 
-use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\HttpKernel\Config\EnvParametersResource;
 use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -113,42 +111,6 @@ class KernelTest extends \PHPUnit_Framework_TestCase
             ->method('doLoadClassCache');
     }
 
-    public function testEnvParametersResourceIsAdded()
-    {
-        $container = new ContainerBuilder();
-        $kernel = $this->getMockBuilder('Symfony\Component\HttpKernel\Tests\Fixtures\KernelForTest')
-            ->disableOriginalConstructor()
-            ->setMethods(array('getContainerBuilder', 'prepareContainer', 'getCacheDir', 'getLogDir'))
-            ->getMock();
-        $kernel->expects($this->any())
-            ->method('getContainerBuilder')
-            ->will($this->returnValue($container));
-        $kernel->expects($this->any())
-            ->method('prepareContainer')
-            ->will($this->returnValue(null));
-        $kernel->expects($this->any())
-            ->method('getCacheDir')
-            ->will($this->returnValue(sys_get_temp_dir()));
-        $kernel->expects($this->any())
-            ->method('getLogDir')
-            ->will($this->returnValue(sys_get_temp_dir()));
-
-        $reflection = new \ReflectionClass(get_class($kernel));
-        $method = $reflection->getMethod('buildContainer');
-        $method->setAccessible(true);
-        $method->invoke($kernel);
-
-        $found = false;
-        foreach ($container->getResources() as $resource) {
-            if ($resource instanceof EnvParametersResource) {
-                $found = true;
-                break;
-            }
-        }
-
-        $this->assertTrue($found);
-    }
-
     public function testBootKernelSeveralTimesOnlyInitializesBundlesOnce()
     {
         $kernel = $this->getKernel(array('initializeBundles', 'initializeContainer'));
@@ -232,6 +194,11 @@ class KernelTest extends \PHPUnit_Framework_TestCase
 
     public function testStripComments()
     {
+        if (!function_exists('token_get_all')) {
+            $this->markTestSkipped('The function token_get_all() is not available.');
+
+            return;
+        }
         $source = <<<'EOF'
 <?php
 
@@ -304,7 +271,7 @@ EOF;
 
         // Heredocs are preserved, making the output mixing Unix and Windows line
         // endings, switching to "\n" everywhere on Windows to avoid failure.
-        if ('\\' === DIRECTORY_SEPARATOR) {
+        if (defined('PHP_WINDOWS_VERSION_MAJOR')) {
             $expected = str_replace("\r\n", "\n", $expected);
             $output = str_replace("\r\n", "\n", $output);
         }
@@ -312,30 +279,21 @@ EOF;
         $this->assertEquals($expected, $output);
     }
 
-    /**
-     * @group legacy
-     */
-    public function testLegacyIsClassInActiveBundleFalse()
+    public function testIsClassInActiveBundleFalse()
     {
         $kernel = $this->getKernelMockForIsClassInActiveBundleTest();
 
         $this->assertFalse($kernel->isClassInActiveBundle('Not\In\Active\Bundle'));
     }
 
-    /**
-     * @group legacy
-     */
-    public function testLegacyIsClassInActiveBundleFalseNoNamespace()
+    public function testIsClassInActiveBundleFalseNoNamespace()
     {
         $kernel = $this->getKernelMockForIsClassInActiveBundleTest();
 
         $this->assertFalse($kernel->isClassInActiveBundle('NotNamespacedClass'));
     }
 
-    /**
-     * @group legacy
-     */
-    public function testLegacyIsClassInActiveBundleTrue()
+    public function testIsClassInActiveBundleTrue()
     {
         $kernel = $this->getKernelMockForIsClassInActiveBundleTest();
 
@@ -344,8 +302,6 @@ EOF;
 
     protected function getKernelMockForIsClassInActiveBundleTest()
     {
-        $this->iniSet('error_reporting', -1 & ~E_USER_DEPRECATED);
-
         $bundle = new FooBarBundle();
 
         $kernel = $this->getKernel(array('getBundles'));
@@ -468,7 +424,7 @@ EOF;
 
         $this->assertEquals(array(
             __DIR__.'/Fixtures/Bundle2Bundle/foo.txt',
-            __DIR__.'/Fixtures/Bundle1Bundle/foo.txt', ),
+            __DIR__.'/Fixtures/Bundle1Bundle/foo.txt',),
             $kernel->locateResource('@Bundle1Bundle/foo.txt', null, false));
     }
 
@@ -531,7 +487,7 @@ EOF;
 
         $this->assertEquals(array(
             __DIR__.'/Fixtures/Resources/Bundle1Bundle/foo.txt',
-            __DIR__.'/Fixtures/Bundle1Bundle/Resources/foo.txt', ),
+            __DIR__.'/Fixtures/Bundle1Bundle/Resources/foo.txt',),
             $kernel->locateResource('@Bundle1Bundle/Resources/foo.txt', __DIR__.'/Fixtures/Resources', false)
         );
     }

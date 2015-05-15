@@ -2,9 +2,8 @@
 
 use Aws\Sqs\SqsClient;
 use Illuminate\Container\Container;
-use Illuminate\Contracts\Queue\Job as JobContract;
 
-class SqsJob extends Job implements JobContract {
+class SqsJob extends Job {
 
 	/**
 	 * The Amazon SQS client instance.
@@ -84,13 +83,7 @@ class SqsJob extends Job implements JobContract {
 	 */
 	public function release($delay = 0)
 	{
-		parent::release($delay);
-
-		$this->sqs->changeMessageVisibility([
-			'QueueUrl' => $this->queue,
-			'ReceiptHandle' => $this->job['ReceiptHandle'],
-			'VisibilityTimeout' => $delay,
-		]);
+		// SQS job releases are handled by the server configuration...
 	}
 
 	/**

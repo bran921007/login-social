@@ -1,18 +1,9 @@
 <?php namespace Illuminate\Routing;
 
 use Closure;
-use BadMethodCallException;
-use InvalidArgumentException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 abstract class Controller {
-
-	/**
-	 * The middleware registered on the controller.
-	 *
-	 * @var array
-	 */
-	protected $middleware = [];
 
 	/**
 	 * The "before" filters registered on the controller.
@@ -29,23 +20,18 @@ abstract class Controller {
 	protected $afterFilters = array();
 
 	/**
-	 * The router instance.
+	 * The route filterer implementation.
 	 *
-	 * @var \Illuminate\Routing\Router
+	 * @var \Illuminate\Routing\RouteFiltererInterface
 	 */
-	protected static $router;
+	protected static $filterer;
 
 	/**
-	 * Register middleware on the controller.
+	 * The layout used by the controller.
 	 *
-	 * @param  string  $middleware
-	 * @param  array   $options
-	 * @return void
+	 * @var \Illuminate\View\View
 	 */
-	public function middleware($middleware, array $options = array())
-	{
-		$this->middleware[$middleware] = $options;
-	}
+	protected $layout;
 
 	/**
 	 * Register a "before" filter on the controller.
@@ -108,7 +94,7 @@ abstract class Controller {
 	 */
 	protected function registerClosureFilter(Closure $filter)
 	{
-		$this->getRouter()->filter($name = spl_object_hash($filter), $filter);
+		$this->getFilterer()->filter($name = spl_object_hash($filter), $filter);
 
 		return $name;
 	}
@@ -121,7 +107,7 @@ abstract class Controller {
 	 */
 	protected function registerInstanceFilter($filter)
 	{
-		$this->getRouter()->filter($filter, array($this, substr($filter, 1)));
+		$this->getFilterer()->filter($filter, array($this, substr($filter, 1)));
 
 		return $filter;
 	}
@@ -130,7 +116,7 @@ abstract class Controller {
 	 * Determine if a filter is a local method on the controller.
 	 *
 	 * @param  mixed  $filter
-	 * @return bool
+	 * @return boolean
 	 *
 	 * @throws \InvalidArgumentException
 	 */
@@ -140,7 +126,7 @@ abstract class Controller {
 		{
 			if (method_exists($this, substr($filter, 1))) return true;
 
-			throw new InvalidArgumentException("Filter method [$filter] does not exist.");
+			throw new \InvalidArgumentException("Filter method [$filter] does not exist.");
 		}
 
 		return false;
@@ -172,7 +158,7 @@ abstract class Controller {
 	 * Remove the given controller filter from the provided filter array.
 	 *
 	 * @param  string  $removing
-	 * @param  array   $current
+	 * @param  array  $current
 	 * @return array
 	 */
 	protected function removeFilter($removing, $current)
@@ -181,16 +167,6 @@ abstract class Controller {
 		{
 			return $filter['original'] != $removing;
 		});
-	}
-
-	/**
-	 * Get the middleware assigned to the controller.
-	 *
-	 * @return array
-	 */
-	public function getMiddleware()
-	{
-		return $this->middleware;
 	}
 
 	/**
@@ -214,25 +190,32 @@ abstract class Controller {
 	}
 
 	/**
-	 * Get the router instance.
+	 * Get the route filterer implementation.
 	 *
-	 * @return \Illuminate\Routing\Router
+	 * @return \Illuminate\Routing\RouteFiltererInterface
 	 */
-	public static function getRouter()
+	public static function getFilterer()
 	{
-		return static::$router;
+		return static::$filterer;
 	}
 
 	/**
-	 * Set the router instance.
+	 * Set the route filterer implementation.
 	 *
-	 * @param  \Illuminate\Routing\Router  $router
+	 * @param  \Illuminate\Routing\RouteFiltererInterface  $filterer
 	 * @return void
 	 */
-	public static function setRouter(Router $router)
+	public static function setFilterer(RouteFiltererInterface $filterer)
 	{
-		static::$router = $router;
+		static::$filterer = $filterer;
 	}
+
+	/**
+	 * Create the layout used by the controller.
+	 *
+	 * @return void
+	 */
+	protected function setupLayout() {}
 
 	/**
 	 * Execute an action on the controller.
@@ -243,7 +226,19 @@ abstract class Controller {
 	 */
 	public function callAction($method, $parameters)
 	{
-		return call_user_func_array(array($this, $method), $parameters);
+		$this->setupLayout();
+
+		$response = call_user_func_array(array($this, $method), $parameters);
+
+		// If no response is returned from the controller action and a layout is being
+		// used we will assume we want to just return the layout view as any nested
+		// views were probably bound on this view during this controller actions.
+		if (is_null($response) && ! is_null($this->layout))
+		{
+			$response = $this->layout;
+		}
+
+		return $response;
 	}
 
 	/**
@@ -270,7 +265,7 @@ abstract class Controller {
 	 */
 	public function __call($method, $parameters)
 	{
-		throw new BadMethodCallException("Method [$method] does not exist.");
+		throw new \BadMethodCallException("Method [$method] does not exist.");
 	}
 
 }

@@ -20,7 +20,7 @@ abstract class MorphOneOrMany extends HasOneOrMany {
 	protected $morphClass;
 
 	/**
-	 * Create a new morph one or many relationship instance.
+	 * Create a new has many relationship instance.
 	 *
 	 * @param  \Illuminate\Database\Eloquent\Builder  $query
 	 * @param  \Illuminate\Database\Eloquent\Model  $parent
@@ -94,83 +94,6 @@ abstract class MorphOneOrMany extends HasOneOrMany {
 	}
 
 	/**
-	 * Find a related model by its primary key or return new instance of the related model.
-	 *
-	 * @param  mixed  $id
-	 * @param  array  $columns
-	 * @return \Illuminate\Support\Collection|\Illuminate\Database\Eloquent\Model
-	 */
-	public function findOrNew($id, $columns = ['*'])
-	{
-		if (is_null($instance = $this->find($id, $columns)))
-		{
-			$instance = $this->related->newInstance();
-
-			// When saving a polymorphic relationship, we need to set not only the foreign
-			// key, but also the foreign key type, which is typically the class name of
-			// the parent model. This makes the polymorphic item unique in the table.
-			$this->setForeignAttributesForCreate($instance);
-		}
-
-		return $instance;
-	}
-
-	/**
-	 * Get the first related model record matching the attributes or instantiate it.
-	 *
-	 * @param  array  $attributes
-	 * @return \Illuminate\Database\Eloquent\Model
-	 */
-	public function firstOrNew(array $attributes)
-	{
-		if (is_null($instance = $this->where($attributes)->first()))
-		{
-			$instance = $this->related->newInstance();
-
-			// When saving a polymorphic relationship, we need to set not only the foreign
-			// key, but also the foreign key type, which is typically the class name of
-			// the parent model. This makes the polymorphic item unique in the table.
-			$this->setForeignAttributesForCreate($instance);
-		}
-
-		return $instance;
-	}
-
-	/**
-	 * Get the first related record matching the attributes or create it.
-	 *
-	 * @param  array  $attributes
-	 * @return \Illuminate\Database\Eloquent\Model
-	 */
-	public function firstOrCreate(array $attributes)
-	{
-		if (is_null($instance = $this->where($attributes)->first()))
-		{
-			$instance = $this->create($attributes);
-		}
-
-		return $instance;
-	}
-
-	/**
-	 * Create or update a related record matching the attributes, and fill it with values.
-	 *
-	 * @param  array  $attributes
-	 * @param  array  $values
-	 * @return \Illuminate\Database\Eloquent\Model
-	 */
-	public function updateOrCreate(array $attributes, array $values = [])
-	{
-		$instance = $this->firstOrNew($attributes);
-
-		$instance->fill($values);
-
-		$instance->save();
-
-		return $instance;
-	}
-
-	/**
 	 * Create a new instance of the related model.
 	 *
 	 * @param  array  $attributes
@@ -178,12 +101,14 @@ abstract class MorphOneOrMany extends HasOneOrMany {
 	 */
 	public function create(array $attributes)
 	{
-		$instance = $this->related->newInstance($attributes);
+		$foreign = $this->getForeignAttributesForCreate();
 
 		// When saving a polymorphic relationship, we need to set not only the foreign
 		// key, but also the foreign key type, which is typically the class name of
 		// the parent model. This makes the polymorphic item unique in the table.
-		$this->setForeignAttributesForCreate($instance);
+		$attributes = array_merge($attributes, $foreign);
+
+		$instance = $this->related->newInstance($attributes);
 
 		$instance->save();
 
@@ -191,16 +116,17 @@ abstract class MorphOneOrMany extends HasOneOrMany {
 	}
 
 	/**
-	 * Set the foreign ID and type for creating a related model.
+	 * Get the foreign ID and type for creating a related model.
 	 *
-	 * @param  \Illuminate\Database\Eloquent\Model  $model
-	 * @return void
+	 * @return array
 	 */
-	protected function setForeignAttributesForCreate(Model $model)
+	protected function getForeignAttributesForCreate()
 	{
-		$model->{$this->getPlainForeignKey()} = $this->getParentKey();
+		$foreign = array($this->getPlainForeignKey() => $this->getParentKey());
 
-		$model->{last(explode('.', $this->morphType))} = $this->morphClass;
+		$foreign[last(explode('.', $this->morphType))] = $this->morphClass;
+
+		return $foreign;
 	}
 
 	/**

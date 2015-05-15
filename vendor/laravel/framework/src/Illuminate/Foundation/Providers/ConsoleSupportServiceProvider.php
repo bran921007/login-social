@@ -1,8 +1,33 @@
 <?php namespace Illuminate\Foundation\Providers;
 
-use Illuminate\Support\AggregateServiceProvider;
+use Illuminate\Support\ServiceProvider;
 
-class ConsoleSupportServiceProvider extends AggregateServiceProvider {
+class ConsoleSupportServiceProvider extends ServiceProvider {
+
+	/**
+	 * The provider class names.
+	 *
+	 * @var array
+	 */
+	protected $providers = array(
+		'Illuminate\Foundation\Providers\CommandCreatorServiceProvider',
+		'Illuminate\Foundation\Providers\ComposerServiceProvider',
+		'Illuminate\Foundation\Providers\KeyGeneratorServiceProvider',
+		'Illuminate\Foundation\Providers\MaintenanceServiceProvider',
+		'Illuminate\Foundation\Providers\OptimizeServiceProvider',
+		'Illuminate\Foundation\Providers\PublisherServiceProvider',
+		'Illuminate\Foundation\Providers\RouteListServiceProvider',
+		'Illuminate\Foundation\Providers\ServerServiceProvider',
+		'Illuminate\Foundation\Providers\TinkerServiceProvider',
+		'Illuminate\Queue\FailConsoleServiceProvider',
+	);
+
+	/**
+	 * An array of the service provider instances.
+	 *
+	 * @var array
+	 */
+	protected $instances = array();
 
 	/**
 	 * Indicates if loading of the provider is deferred.
@@ -12,19 +37,37 @@ class ConsoleSupportServiceProvider extends AggregateServiceProvider {
 	protected $defer = true;
 
 	/**
-	 * The provider class names.
+	 * Register the service provider.
 	 *
-	 * @var array
+	 * @return void
 	 */
-	protected $providers = [
-		'Illuminate\Auth\GeneratorServiceProvider',
-		'Illuminate\Console\ScheduleServiceProvider',
-		'Illuminate\Database\MigrationServiceProvider',
-		'Illuminate\Database\SeedServiceProvider',
-		'Illuminate\Foundation\Providers\ComposerServiceProvider',
-		'Illuminate\Queue\ConsoleServiceProvider',
-		'Illuminate\Routing\GeneratorServiceProvider',
-		'Illuminate\Session\CommandsServiceProvider',
-	];
+	public function register()
+	{
+		$this->instances = array();
+
+		foreach ($this->providers as $provider)
+		{
+			$this->instances[] = $this->app->register($provider);
+		}
+	}
+
+	/**
+	 * Get the services provided by the provider.
+	 *
+	 * @return array
+	 */
+	public function provides()
+	{
+		$provides = array();
+
+		foreach ($this->providers as $provider)
+		{
+			$instance = $this->app->resolveProviderClass($provider);
+
+			$provides = array_merge($provides, $instance->provides());
+		}
+
+		return $provides;
+	}
 
 }

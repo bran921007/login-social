@@ -62,21 +62,11 @@ class Collection extends BaseCollection {
 	 * Determine if a key exists in the collection.
 	 *
 	 * @param  mixed  $key
-	 * @param  mixed  $value
 	 * @return bool
 	 */
-	public function contains($key, $value = null)
+	public function contains($key)
 	{
-		if (func_num_args() == 2) return parent::contains($key, $value);
-
-		if ($this->useAsCallable($key)) return parent::contains($key);
-
-		$key = $key instanceof Model ? $key->getKey() : $key;
-
-		return parent::contains(function($k, $m) use ($key)
-		{
-			return $m->getKey() == $key;
-		});
+		return ! is_null($this->find($key));
 	}
 
 	/**
@@ -100,7 +90,7 @@ class Collection extends BaseCollection {
 	{
 		return $this->reduce(function($result, $item) use ($key)
 		{
-			return is_null($result) || $item->{$key} > $result ? $item->{$key} : $result;
+			return (is_null($result) || $item->{$key} > $result) ? $item->{$key} : $result;
 		});
 	}
 
@@ -114,12 +104,12 @@ class Collection extends BaseCollection {
 	{
 		return $this->reduce(function($result, $item) use ($key)
 		{
-			return is_null($result) || $item->{$key} < $result ? $item->{$key} : $result;
+			return (is_null($result) || $item->{$key} < $result) ? $item->{$key} : $result;
 		});
 	}
 
 	/**
-	 * Get the array of primary keys.
+	 * Get the array of primary keys
 	 *
 	 * @return array
 	 */

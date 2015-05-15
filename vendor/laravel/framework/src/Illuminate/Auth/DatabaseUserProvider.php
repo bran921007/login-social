@@ -1,23 +1,21 @@
 <?php namespace Illuminate\Auth;
 
-use Illuminate\Contracts\Auth\UserProvider;
-use Illuminate\Database\ConnectionInterface;
-use Illuminate\Contracts\Hashing\Hasher as HasherContract;
-use Illuminate\Contracts\Auth\Authenticatable as UserContract;
+use Illuminate\Database\Connection;
+use Illuminate\Hashing\HasherInterface;
 
-class DatabaseUserProvider implements UserProvider {
+class DatabaseUserProvider implements UserProviderInterface {
 
 	/**
 	 * The active database connection.
 	 *
-	 * @var \Illuminate\Database\ConnectionInterface
+	 * @var \Illuminate\Database\Connection
 	 */
 	protected $conn;
 
 	/**
 	 * The hasher implementation.
 	 *
-	 * @var \Illuminate\Contracts\Hashing\Hasher
+	 * @var \Illuminate\Hashing\HasherInterface
 	 */
 	protected $hasher;
 
@@ -31,12 +29,12 @@ class DatabaseUserProvider implements UserProvider {
 	/**
 	 * Create a new database user provider.
 	 *
-	 * @param  \Illuminate\Database\ConnectionInterface  $conn
-	 * @param  \Illuminate\Contracts\Hashing\Hasher  $hasher
+	 * @param  \Illuminate\Database\Connection  $conn
+	 * @param  \Illuminate\Hashing\HasherInterface  $hasher
 	 * @param  string  $table
 	 * @return void
 	 */
-	public function __construct(ConnectionInterface $conn, HasherContract $hasher, $table)
+	public function __construct(Connection $conn, HasherInterface $hasher, $table)
 	{
 		$this->conn = $conn;
 		$this->table = $table;
@@ -47,13 +45,16 @@ class DatabaseUserProvider implements UserProvider {
 	 * Retrieve a user by their unique identifier.
 	 *
 	 * @param  mixed  $identifier
-	 * @return \Illuminate\Contracts\Auth\Authenticatable|null
+	 * @return \Illuminate\Auth\UserInterface|null
 	 */
 	public function retrieveById($identifier)
 	{
 		$user = $this->conn->table($this->table)->find($identifier);
 
-		return $this->getGenericUser($user);
+		if ( ! is_null($user))
+		{
+			return new GenericUser((array) $user);
+		}
 	}
 
 	/**
@@ -61,7 +62,7 @@ class DatabaseUserProvider implements UserProvider {
 	 *
 	 * @param  mixed   $identifier
 	 * @param  string  $token
-	 * @return \Illuminate\Contracts\Auth\Authenticatable|null
+	 * @return \Illuminate\Auth\UserInterface|null
 	 */
 	public function retrieveByToken($identifier, $token)
 	{
@@ -70,28 +71,31 @@ class DatabaseUserProvider implements UserProvider {
                                 ->where('remember_token', $token)
                                 ->first();
 
-		return $this->getGenericUser($user);
+		if ( ! is_null($user))
+		{
+			return new GenericUser((array) $user);
+		}
 	}
 
 	/**
 	 * Update the "remember me" token for the given user in storage.
 	 *
-	 * @param  \Illuminate\Contracts\Auth\Authenticatable  $user
+	 * @param  \Illuminate\Auth\UserInterface  $user
 	 * @param  string  $token
 	 * @return void
 	 */
-	public function updateRememberToken(UserContract $user, $token)
+	public function updateRememberToken(UserInterface $user, $token)
 	{
 		$this->conn->table($this->table)
                             ->where('id', $user->getAuthIdentifier())
-                            ->update(['remember_token' => $token]);
+                            ->update(array('remember_token' => $token));
 	}
 
 	/**
 	 * Retrieve a user by the given credentials.
 	 *
 	 * @param  array  $credentials
-	 * @return \Illuminate\Contracts\Auth\Authenticatable|null
+	 * @return \Illuminate\Auth\UserInterface|null
 	 */
 	public function retrieveByCredentials(array $credentials)
 	{
@@ -113,18 +117,7 @@ class DatabaseUserProvider implements UserProvider {
 		// that there are no matching users for these given credential arrays.
 		$user = $query->first();
 
-		return $this->getGenericUser($user);
-	}
-
-	/**
-	 * Get the generic user.
-	 *
-	 * @param  mixed  $user
-	 * @return \Illuminate\Auth\GenericUser|null
-	 */
-	protected function getGenericUser($user)
-	{
-		if ($user !== null)
+		if ( ! is_null($user))
 		{
 			return new GenericUser((array) $user);
 		}
@@ -133,11 +126,11 @@ class DatabaseUserProvider implements UserProvider {
 	/**
 	 * Validate a user against the given credentials.
 	 *
-	 * @param  \Illuminate\Contracts\Auth\Authenticatable  $user
+	 * @param  \Illuminate\Auth\UserInterface  $user
 	 * @param  array  $credentials
 	 * @return bool
 	 */
-	public function validateCredentials(UserContract $user, array $credentials)
+	public function validateCredentials(UserInterface $user, array $credentials)
 	{
 		$plain = $credentials['password'];
 

@@ -1,14 +1,13 @@
 <?php namespace Illuminate\Session;
 
-use SessionHandlerInterface;
-use Illuminate\Contracts\Cache\Repository as CacheContract;
+use Illuminate\Cache\Repository;
 
-class CacheBasedSessionHandler implements SessionHandlerInterface {
+class CacheBasedSessionHandler implements \SessionHandlerInterface {
 
 	/**
 	 * The cache repository instance.
 	 *
-	 * @var \Illuminate\Contracts\Cache\Repository
+	 * @var \Illuminate\Cache\Repository
 	 */
 	protected $cache;
 
@@ -22,11 +21,11 @@ class CacheBasedSessionHandler implements SessionHandlerInterface {
 	/**
 	 * Create a new cache driven handler instance.
 	 *
-	 * @param  \Illuminate\Contracts\Cache\Repository  $cache
+	 * @param  \Illuminate\Cache\Repository  $cache
 	 * @param  int  $minutes
 	 * @return void
 	 */
-	public function __construct(CacheContract $cache, $minutes)
+	public function __construct(Repository $cache, $minutes)
 	{
 		$this->cache = $cache;
 		$this->minutes = $minutes;
@@ -83,7 +82,7 @@ class CacheBasedSessionHandler implements SessionHandlerInterface {
 	/**
 	 * Get the underlying cache repository.
 	 *
-	 * @return \Illuminate\Contracts\Cache\Repository
+	 * @return \Illuminate\Cache\Repository
 	 */
 	public function getCache()
 	{

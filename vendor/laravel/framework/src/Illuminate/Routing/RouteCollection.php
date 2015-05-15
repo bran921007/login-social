@@ -107,7 +107,10 @@ class RouteCollection implements Countable, IteratorAggregate {
 	 */
 	protected function addToActionList($action, $route)
 	{
-		$this->actionList[$action['controller']] = $route;
+		if ( ! isset($this->actionList[$action['controller']]))
+		{
+			$this->actionList[$action['controller']] = $route;
+		}
 	}
 
 	/**
@@ -139,7 +142,7 @@ class RouteCollection implements Countable, IteratorAggregate {
 
 		if (count($others) > 0)
 		{
-			return $this->getRouteForMethods($request, $others);
+			return $this->getOtherMethodsRoute($request, $others);
 		}
 
 		throw new NotFoundHttpException;
@@ -175,23 +178,23 @@ class RouteCollection implements Countable, IteratorAggregate {
 	 * Get a route (if necessary) that responds when other available methods are present.
 	 *
 	 * @param  \Illuminate\Http\Request  $request
-	 * @param  array  $methods
+	 * @param  array  $others
 	 * @return \Illuminate\Routing\Route
 	 *
 	 * @throws \Symfony\Component\Routing\Exception\MethodNotAllowedHttpException
 	 */
-	protected function getRouteForMethods($request, array $methods)
+	protected function getOtherMethodsRoute($request, array $others)
 	{
 		if ($request->method() == 'OPTIONS')
 		{
-			return (new Route('OPTIONS', $request->path(), function() use ($methods)
+			return (new Route('OPTIONS', $request->path(), function() use ($others)
 			{
-				return new Response('', 200, array('Allow' => implode(',', $methods)));
+				return new Response('', 200, array('Allow' => implode(',', $others)));
 
 			}))->bind($request);
 		}
 
-		$this->methodNotAllowed($methods);
+		$this->methodNotAllowed($others);
 	}
 
 	/**

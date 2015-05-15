@@ -9,49 +9,8 @@
  * file that was distributed with this source code.
  */
 
-namespace Symfony\Component\HttpKernel\Exception;
-
-use Symfony\Component\Debug\Exception\FlattenException as DebugFlattenException;
-
-/**
- * FlattenException wraps a PHP Exception to be able to serialize it.
- *
- * Basically, this class removes all objects from the trace.
- *
- * @author Fabien Potencier <fabien@symfony.com>
- *
- * @deprecated Deprecated in 2.3, to be removed in 3.0. Use the same class from the Debug component instead.
- */
-class FlattenException
-{
-    private $handler;
-
-    public static function __callStatic($method, $args)
-    {
-        if (!method_exists('Symfony\Component\Debug\Exception\FlattenException', $method)) {
-            throw new \BadMethodCallException(sprintf('Call to undefined method %s::%s()', get_called_class(), $method));
-        }
-
-        return call_user_func_array(array('Symfony\Component\Debug\Exception\FlattenException', $method), $args);
-    }
-
-    public function __call($method, $args)
-    {
-        if (!isset($this->handler)) {
-            $this->handler = new DebugFlattenException();
-        }
-
-        if (!method_exists($this->handler, $method)) {
-            throw new \BadMethodCallException(sprintf('Call to undefined method %s::%s()', get_class($this), $method));
-        }
-
-        return call_user_func_array(array($this->handler, $method), $args);
-    }
-}
-
 namespace Symfony\Component\Debug\Exception;
 
-use Symfony\Component\HttpKernel\Exception\FlattenException as LegacyFlattenException;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 /**
@@ -61,7 +20,7 @@ use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
  *
  * @author Fabien Potencier <fabien@symfony.com>
  */
-class FlattenException extends LegacyFlattenException
+class FlattenException
 {
     private $message;
     private $code;
@@ -107,8 +66,8 @@ class FlattenException extends LegacyFlattenException
         foreach (array_merge(array($this), $this->getAllPrevious()) as $exception) {
             $exceptions[] = array(
                 'message' => $exception->getMessage(),
-                'class' => $exception->getClass(),
-                'trace' => $exception->getTrace(),
+                'class'   => $exception->getClass(),
+                'trace'   => $exception->getTrace(),
             );
         }
 
@@ -220,14 +179,14 @@ class FlattenException extends LegacyFlattenException
     {
         $this->trace = array();
         $this->trace[] = array(
-            'namespace' => '',
+            'namespace'   => '',
             'short_class' => '',
-            'class' => '',
-            'type' => '',
-            'function' => '',
-            'file' => $file,
-            'line' => $line,
-            'args' => array(),
+            'class'       => '',
+            'type'        => '',
+            'function'    => '',
+            'file'        => $file,
+            'line'        => $line,
+            'args'        => array(),
         );
         foreach ($trace as $entry) {
             $class = '';
@@ -239,32 +198,29 @@ class FlattenException extends LegacyFlattenException
             }
 
             $this->trace[] = array(
-                'namespace' => $namespace,
+                'namespace'   => $namespace,
                 'short_class' => $class,
-                'class' => isset($entry['class']) ? $entry['class'] : '',
-                'type' => isset($entry['type']) ? $entry['type'] : '',
-                'function' => isset($entry['function']) ? $entry['function'] : null,
-                'file' => isset($entry['file']) ? $entry['file'] : null,
-                'line' => isset($entry['line']) ? $entry['line'] : null,
-                'args' => isset($entry['args']) ? $this->flattenArgs($entry['args']) : array(),
+                'class'       => isset($entry['class']) ? $entry['class'] : '',
+                'type'        => isset($entry['type']) ? $entry['type'] : '',
+                'function'    => isset($entry['function']) ? $entry['function'] : null,
+                'file'        => isset($entry['file']) ? $entry['file'] : null,
+                'line'        => isset($entry['line']) ? $entry['line'] : null,
+                'args'        => isset($entry['args']) ? $this->flattenArgs($entry['args']) : array(),
             );
         }
     }
 
-    private function flattenArgs($args, $level = 0, &$count = 0)
+    private function flattenArgs($args, $level = 0)
     {
         $result = array();
         foreach ($args as $key => $value) {
-            if (++$count > 1e4) {
-                return array('array', '*SKIPPED over 10000 entries*');
-            }
             if (is_object($value)) {
                 $result[$key] = array('object', get_class($value));
             } elseif (is_array($value)) {
                 if ($level > 10) {
                     $result[$key] = array('array', '*DEEP NESTED ARRAY*');
                 } else {
-                    $result[$key] = array('array', $this->flattenArgs($value, $level + 1, $count));
+                    $result[$key] = array('array', $this->flattenArgs($value, $level + 1));
                 }
             } elseif (null === $value) {
                 $result[$key] = array('null', null);

@@ -24,7 +24,7 @@ class Manager {
 	 */
 	public function __construct(Container $container = null)
 	{
-		$this->setupContainer($container ?: new Container);
+		$this->setupContainer($container);
 
 		// Once we have the container setup, we will setup the default configuration
 		// options in the container "config" bindings. This just makes this queue
@@ -72,7 +72,7 @@ class Manager {
 	 * Get a connection instance from the global manager.
 	 *
 	 * @param  string  $connection
-	 * @return \Illuminate\Contracts\Queue\Queue
+	 * @return \Illuminate\Queue\QueueInterface
 	 */
 	public static function connection($connection = null)
 	{
@@ -126,7 +126,7 @@ class Manager {
 	 * Get a registered connection instance.
 	 *
 	 * @param  string  $name
-	 * @return \Illuminate\Contracts\Queue\Queue
+	 * @return \Illuminate\Queue\QueueInterface
 	 */
 	public function getConnection($name = null)
 	{

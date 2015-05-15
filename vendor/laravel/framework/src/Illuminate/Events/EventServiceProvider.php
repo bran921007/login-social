@@ -11,12 +11,9 @@ class EventServiceProvider extends ServiceProvider {
 	 */
 	public function register()
 	{
-		$this->app->singleton('events', function($app)
+		$this->app['events'] = $this->app->share(function($app)
 		{
-			return (new Dispatcher($app))->setQueueResolver(function() use ($app)
-			{
-				return $app->make('Illuminate\Contracts\Queue\Queue');
-			});
+			return new Dispatcher($app);
 		});
 	}
 

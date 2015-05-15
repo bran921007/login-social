@@ -1,9 +1,9 @@
 <?php namespace Illuminate\Queue\Jobs;
 
+use Closure;
 use Illuminate\Container\Container;
-use Illuminate\Contracts\Queue\Job as JobContract;
 
-class SyncJob extends Job implements JobContract {
+class SyncJob extends Job {
 
 	/**
 	 * The class name of the job.
@@ -17,18 +17,20 @@ class SyncJob extends Job implements JobContract {
 	 *
 	 * @var string
 	 */
-	protected $payload;
+	protected $data;
 
 	/**
 	 * Create a new job instance.
 	 *
 	 * @param  \Illuminate\Container\Container  $container
-	 * @param  string  $payload
+	 * @param  string  $job
+	 * @param  string  $data
 	 * @return void
 	 */
-	public function __construct(Container $container, $payload)
+	public function __construct(Container $container, $job, $data = '')
 	{
-		$this->payload = $payload;
+		$this->job = $job;
+		$this->data = $data;
 		$this->container = $container;
 	}
 
@@ -39,7 +41,16 @@ class SyncJob extends Job implements JobContract {
 	 */
 	public function fire()
 	{
-		$this->resolveAndFire(json_decode($this->payload, true));
+		$data = json_decode($this->data, true);
+
+		if ($this->job instanceof Closure)
+		{
+			call_user_func($this->job, $this, $data);
+		}
+		else
+		{
+			$this->resolveAndFire(array('job' => $this->job, 'data' => $data));
+		}
 	}
 
 	/**
@@ -49,7 +60,7 @@ class SyncJob extends Job implements JobContract {
 	 */
 	public function getRawBody()
 	{
-		return $this->payload;
+		//
 	}
 
 	/**
@@ -60,7 +71,7 @@ class SyncJob extends Job implements JobContract {
 	 */
 	public function release($delay = 0)
 	{
-		parent::release($delay);
+		//
 	}
 
 	/**

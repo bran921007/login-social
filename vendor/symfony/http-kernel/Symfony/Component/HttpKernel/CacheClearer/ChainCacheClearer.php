@@ -19,7 +19,7 @@ namespace Symfony\Component\HttpKernel\CacheClearer;
 class ChainCacheClearer implements CacheClearerInterface
 {
     /**
-     * @var array
+     * @var array $clearers
      */
     protected $clearers;
 

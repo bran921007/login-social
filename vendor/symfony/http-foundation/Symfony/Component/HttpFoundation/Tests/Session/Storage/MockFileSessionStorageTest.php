@@ -28,7 +28,7 @@ class MockFileSessionStorageTest extends \PHPUnit_Framework_TestCase
     private $sessionDir;
 
     /**
-     * @var MockFileSessionStorage
+     * @var FileMockSessionStorage
      */
     protected $storage;
 

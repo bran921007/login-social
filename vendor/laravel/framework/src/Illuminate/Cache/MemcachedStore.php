@@ -1,8 +1,6 @@
 <?php namespace Illuminate\Cache;
 
-use Illuminate\Contracts\Cache\Store;
-
-class MemcachedStore extends TaggableStore implements Store {
+class MemcachedStore extends TaggableStore implements StoreInterface {
 
 	/**
 	 * The Memcached instance.
@@ -61,19 +59,6 @@ class MemcachedStore extends TaggableStore implements Store {
 	}
 
 	/**
-	 * Store an item in the cache if the key doesn't exist.
-	 *
-	 * @param  string  $key
-	 * @param  mixed   $value
-	 * @param  int     $minutes
-	 * @return bool
-	 */
-	public function add($key, $value, $minutes)
-	{
-		return $this->memcached->add($this->prefix.$key, $value, $minutes * 60);
-	}
-
-	/**
 	 * Increment the value of an item in the cache.
 	 *
 	 * @param  string  $key
@@ -106,18 +91,18 @@ class MemcachedStore extends TaggableStore implements Store {
 	 */
 	public function forever($key, $value)
 	{
-		$this->put($key, $value, 0);
+		return $this->put($key, $value, 0);
 	}
 
 	/**
 	 * Remove an item from the cache.
 	 *
 	 * @param  string  $key
-	 * @return bool
+	 * @return void
 	 */
 	public function forget($key)
 	{
-		return $this->memcached->delete($this->prefix.$key);
+		$this->memcached->delete($this->prefix.$key);
 	}
 
 	/**

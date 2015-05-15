@@ -65,6 +65,7 @@ class JsonFormatterTest extends TestCase
      */
     public function testFormatBatchNewlines()
     {
+
         $formatter = new JsonFormatter(JsonFormatter::BATCH_MODE_NEWLINES);
         $records = $expected = array(
             $this->getRecord(Logger::WARNING),

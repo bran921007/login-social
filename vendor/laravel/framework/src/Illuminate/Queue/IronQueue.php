@@ -4,9 +4,8 @@ use IronMQ;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Queue\Jobs\IronJob;
-use Illuminate\Contracts\Queue\Queue as QueueContract;
 
-class IronQueue extends Queue implements QueueContract {
+class IronQueue extends Queue implements QueueInterface {
 
 	/**
 	 * The IronMQ instance.
@@ -118,7 +117,7 @@ class IronQueue extends Queue implements QueueContract {
 	 * Pop the next job off of the queue.
 	 *
 	 * @param  string  $queue
-	 * @return \Illuminate\Contracts\Queue\Job|null
+	 * @return \Illuminate\Queue\Jobs\Job|null
 	 */
 	public function pop($queue = null)
 	{

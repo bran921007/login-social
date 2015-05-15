@@ -15,6 +15,7 @@ use Monolog\Logger;
 
 class LogstashFormatterTest extends \PHPUnit_Framework_TestCase
 {
+
     /**
      * @covers Monolog\Formatter\LogstashFormatter::format
      */
@@ -101,6 +102,7 @@ class LogstashFormatterTest extends \PHPUnit_Framework_TestCase
 
         $this->assertArrayHasKey('CTXfrom', $message_array);
         $this->assertEquals('logger', $message_array['CTXfrom']);
+
     }
 
     /**
@@ -237,6 +239,7 @@ class LogstashFormatterTest extends \PHPUnit_Framework_TestCase
 
         $this->assertArrayHasKey('CTXfrom', $message);
         $this->assertEquals('logger', $message['CTXfrom']);
+
     }
 
     /**

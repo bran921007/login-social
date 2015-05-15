@@ -1,31 +1,25 @@
 <?php
 
-namespace PhpParser\Node\Expr;
-
-use PhpParser\Node;
-use PhpParser\Node\Expr;
-
-class FuncCall extends Expr
+/**
+ * @property PHPParser_Node_Name|PHPParser_Node_Expr $name Function name
+ * @property PHPParser_Node_Arg[]                    $args Arguments
+ */
+class PHPParser_Node_Expr_FuncCall extends PHPParser_Node_Expr
 {
-    /** @var Node\Name|Expr Function name */
-    public $name;
-    /** @var Node\Arg[] Arguments */
-    public $args;
-
     /**
      * Constructs a function call node.
      *
-     * @param Node\Name|Expr $name       Function name
-     * @param Node\Arg[]                    $args       Arguments
+     * @param PHPParser_Node_Name|PHPParser_Node_Expr $name       Function name
+     * @param PHPParser_Node_Arg[]                    $args       Arguments
      * @param array                                   $attributes Additional attributes
      */
     public function __construct($name, array $args = array(), array $attributes = array()) {
-        parent::__construct(null, $attributes);
-        $this->name = $name;
-        $this->args = $args;
-    }
-
-    public function getSubNodeNames() {
-        return array('name', 'args');
+        parent::__construct(
+            array(
+                'name' => $name,
+                'args' => $args
+            ),
+            $attributes
+        );
     }
 }

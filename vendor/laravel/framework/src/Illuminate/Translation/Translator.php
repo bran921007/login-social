@@ -145,9 +145,9 @@ class Translator extends NamespacedItemResolver implements TranslatorInterface {
 	 */
 	protected function sortReplacements(array $replace)
 	{
-		return (new Collection($replace))->sortBy(function($value, $key)
+		return (new Collection($replace))->sortBy(function($r)
 		{
-			return mb_strlen($key) * -1;
+			return mb_strlen($r) * -1;
 		});
 	}
 
@@ -162,7 +162,7 @@ class Translator extends NamespacedItemResolver implements TranslatorInterface {
 	 */
 	public function choice($key, $number, array $replace = array(), $locale = null)
 	{
-		$line = $this->get($key, $replace, $locale = $locale ?: $this->locale ?: $this->fallback);
+		$line = $this->get($key, $replace, $locale = $locale ?: $this->locale);
 
 		$replace['count'] = $number;
 

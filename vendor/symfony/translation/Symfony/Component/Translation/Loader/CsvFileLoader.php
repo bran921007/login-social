@@ -22,11 +22,11 @@ use Symfony\Component\Config\Resource\FileResource;
  *
  * @api
  */
-class CsvFileLoader extends ArrayLoader
+class CsvFileLoader extends ArrayLoader implements LoaderInterface
 {
     private $delimiter = ';';
     private $enclosure = '"';
-    private $escape = '\\';
+    private $escape    = '\\';
 
     /**
      * {@inheritdoc}
@@ -71,10 +71,7 @@ class CsvFileLoader extends ArrayLoader
         }
 
         $catalogue = parent::load($messages, $locale, $domain);
-
-        if (class_exists('Symfony\Component\Config\Resource\FileResource')) {
-            $catalogue->addResource(new FileResource($resource));
-        }
+        $catalogue->addResource(new FileResource($resource));
 
         return $catalogue;
     }
@@ -90,6 +87,6 @@ class CsvFileLoader extends ArrayLoader
     {
         $this->delimiter = $delimiter;
         $this->enclosure = $enclosure;
-        $this->escape = $escape;
+        $this->escape    = $escape;
     }
 }

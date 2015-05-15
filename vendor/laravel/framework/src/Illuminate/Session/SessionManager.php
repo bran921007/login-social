@@ -23,7 +23,7 @@ class SessionManager extends Manager {
 	 */
 	protected function createArrayDriver()
 	{
-		return $this->buildSession(new NullSessionHandler);
+		return new Store($this->app['config']['session.cookie'], new NullSessionHandler);
 	}
 
 	/**
@@ -162,16 +162,7 @@ class SessionManager extends Manager {
 	 */
 	protected function buildSession($handler)
 	{
-		if ($this->app['config']['session.encrypt'])
-		{
-			return new EncryptedStore(
-				$this->app['config']['session.cookie'], $handler, $this->app['encrypter']
-			);
-		}
-		else
-		{
-			return new Store($this->app['config']['session.cookie'], $handler);
-		}
+		return new Store($this->app['config']['session.cookie'], $handler);
 	}
 
 	/**

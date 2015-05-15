@@ -1,26 +1,22 @@
 <?php
 
-namespace PhpParser\Node\Expr;
-
-use PhpParser\Node\Expr;
-
-class PostDec extends Expr
+/**
+ * @property PHPParser_Node_Expr $var Variable
+ */
+class PHPParser_Node_Expr_PostDec extends PHPParser_Node_Expr
 {
-    /** @var Expr Variable */
-    public $var;
-
     /**
      * Constructs a post decrement node.
      *
-     * @param Expr  $var        Variable
-     * @param array $attributes Additional attributes
+     * @param PHPParser_Node_Expr $var        Variable
+     * @param array               $attributes Additional attributes
      */
-    public function __construct(Expr $var, array $attributes = array()) {
-        parent::__construct(null, $attributes);
-        $this->var = $var;
-    }
-
-    public function getSubNodeNames() {
-        return array('var');
+    public function __construct(PHPParser_Node_Expr $var, array $attributes = array()) {
+        parent::__construct(
+            array(
+                'var' => $var
+            ),
+            $attributes
+        );
     }
 }

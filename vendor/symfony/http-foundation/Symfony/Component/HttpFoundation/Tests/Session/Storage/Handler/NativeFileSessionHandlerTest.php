@@ -20,7 +20,6 @@ use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage;
  * @author Drak <drak@zikula.org>
  *
  * @runTestsInSeparateProcesses
- * @preserveGlobalState disabled
  */
 class NativeFileSessionHandlerTest extends \PHPUnit_Framework_TestCase
 {
@@ -28,7 +27,7 @@ class NativeFileSessionHandlerTest extends \PHPUnit_Framework_TestCase
     {
         $storage = new NativeSessionStorage(array('name' => 'TESTING'), new NativeFileSessionHandler(sys_get_temp_dir()));
 
-        if (PHP_VERSION_ID < 50400) {
+        if (version_compare(phpversion(), '5.4.0', '<')) {
             $this->assertEquals('files', $storage->getSaveHandler()->getSaveHandlerName());
             $this->assertEquals('files', ini_get('session.save_handler'));
         } else {

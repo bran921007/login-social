@@ -18,8 +18,6 @@ $filesystem->touch($files, $time = null, $atime = null);
 
 $filesystem->remove($files);
 
-$filesystem->exists($files);
-
 $filesystem->chmod($files, $mode, $umask = 0000, $recursive = false);
 
 $filesystem->chown($files, $user, $recursive = false);
@@ -43,5 +41,5 @@ Resources
 You can run the unit tests with the following command:
 
     $ cd path/to/Symfony/Component/Filesystem/
-    $ composer install
+    $ composer.phar install
     $ phpunit

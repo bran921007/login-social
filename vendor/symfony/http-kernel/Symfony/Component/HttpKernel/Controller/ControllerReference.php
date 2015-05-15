@@ -11,8 +11,6 @@
 
 namespace Symfony\Component\HttpKernel\Controller;
 
-use Symfony\Component\HttpKernel\Fragment\FragmentRendererInterface;
-
 /**
  * Acts as a marker and a data holder for a Controller.
  *
@@ -22,7 +20,8 @@ use Symfony\Component\HttpKernel\Fragment\FragmentRendererInterface;
  *
  * @author Fabien Potencier <fabien@symfony.com>
  *
- * @see FragmentRendererInterface
+ * @see Symfony\Component\HttpKernel\FragmentRenderer
+ * @see Symfony\Component\HttpKernel\Fragment\FragmentRendererInterface
  */
 class ControllerReference
 {

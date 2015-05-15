@@ -1,7 +1,6 @@
 <?php namespace Illuminate\Session\Console;
 
 use Illuminate\Console\Command;
-use Illuminate\Foundation\Composer;
 use Illuminate\Filesystem\Filesystem;
 
 class SessionTableCommand extends Command {
@@ -28,23 +27,16 @@ class SessionTableCommand extends Command {
 	protected $files;
 
 	/**
-	 * @var \Illuminate\Foundation\Composer
-	 */
-	protected $composer;
-
-	/**
 	 * Create a new session table command instance.
 	 *
 	 * @param  \Illuminate\Filesystem\Filesystem  $files
-	 * @param  \Illuminate\Foundation\Composer  $composer
 	 * @return void
 	 */
-	public function __construct(Filesystem $files, Composer $composer)
+	public function __construct(Filesystem $files)
 	{
 		parent::__construct();
 
 		$this->files = $files;
-		$this->composer = $composer;
 	}
 
 	/**
@@ -60,7 +52,7 @@ class SessionTableCommand extends Command {
 
 		$this->info('Migration created successfully!');
 
-		$this->composer->dumpAutoloads();
+		$this->call('dump-autoload');
 	}
 
 	/**
@@ -72,7 +64,7 @@ class SessionTableCommand extends Command {
 	{
 		$name = 'create_session_table';
 
-		$path = $this->laravel->databasePath().'/migrations';
+		$path = $this->laravel['path'].'/database/migrations';
 
 		return $this->laravel['migration.creator']->create($name, $path);
 	}

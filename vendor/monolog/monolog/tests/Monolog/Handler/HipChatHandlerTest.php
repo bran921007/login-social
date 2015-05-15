@@ -20,6 +20,7 @@ use Monolog\Logger;
  */
 class HipChatHandlerTest extends TestCase
 {
+
     private $res;
     private $handler;
 
@@ -31,18 +32,6 @@ class HipChatHandlerTest extends TestCase
         $content = fread($this->res, 1024);
 
         $this->assertRegexp('/POST \/v1\/rooms\/message\?format=json&auth_token=.* HTTP\/1.1\\r\\nHost: api.hipchat.com\\r\\nContent-Type: application\/x-www-form-urlencoded\\r\\nContent-Length: \d{2,4}\\r\\n\\r\\n/', $content);
-
-        return $content;
-    }
-
-    public function testWriteCustomHostHeader()
-    {
-        $this->createHandler('myToken', 'room1', 'Monolog', false, 'hipchat.foo.bar');
-        $this->handler->handle($this->getRecord(Logger::CRITICAL, 'test1'));
-        fseek($this->res, 0);
-        $content = fread($this->res, 1024);
-
-        $this->assertRegexp('/POST \/v1\/rooms\/message\?format=json&auth_token=.* HTTP\/1.1\\r\\nHost: hipchat.foo.bar\\r\\nContent-Type: application\/x-www-form-urlencoded\\r\\nContent-Length: \d{2,4}\\r\\n\\r\\n/', $content);
 
         return $content;
     }
@@ -141,9 +130,9 @@ class HipChatHandlerTest extends TestCase
         );
     }
 
-    private function createHandler($token = 'myToken', $room = 'room1', $name = 'Monolog', $notify = false, $host = 'api.hipchat.com')
+    private function createHandler($token = 'myToken', $room = 'room1', $name = 'Monolog', $notify = false)
     {
-        $constructorArgs = array($token, $room, $name, $notify, Logger::DEBUG, true, true, 'text', $host);
+        $constructorArgs = array($token, $room, $name, $notify, Logger::DEBUG);
         $this->res = fopen('php://memory', 'a');
         $this->handler = $this->getMock(
             '\Monolog\Handler\HipChatHandler',

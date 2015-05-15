@@ -5,21 +5,39 @@ use Illuminate\Support\ServiceProvider;
 class PaginationServiceProvider extends ServiceProvider {
 
 	/**
+	 * Indicates if loading of the provider is deferred.
+	 *
+	 * @var bool
+	 */
+	protected $defer = true;
+
+	/**
 	 * Register the service provider.
 	 *
 	 * @return void
 	 */
 	public function register()
 	{
-		Paginator::currentPathResolver(function()
+		$this->app->bindShared('paginator', function($app)
 		{
-			return $this->app['request']->url();
-		});
+			$paginator = new Factory($app['request'], $app['view'], $app['translator']);
 
-		Paginator::currentPageResolver(function()
-		{
-			return $this->app['request']->input('page');
+			$paginator->setViewName($app['config']['view.pagination']);
+
+			$app->refresh('request', $paginator, 'setRequest');
+
+			return $paginator;
 		});
+	}
+
+	/**
+	 * Get the services provided by the provider.
+	 *
+	 * @return array
+	 */
+	public function provides()
+	{
+		return array('paginator');
 	}
 
 }

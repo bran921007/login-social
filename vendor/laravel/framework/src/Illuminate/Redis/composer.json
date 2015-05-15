@@ -1,12 +1,6 @@
 {
     "name": "illuminate/redis",
-    "description": "The Illuminate Redis package.",
     "license": "MIT",
-    "homepage": "http://laravel.com",
-    "support": {
-        "issues": "https://github.com/laravel/framework/issues",
-        "source": "https://github.com/laravel/framework"
-    },
     "authors": [
         {
             "name": "Taylor Otwell",
@@ -15,18 +9,18 @@
     ],
     "require": {
         "php": ">=5.4.0",
-        "illuminate/contracts": "5.0.*",
-        "illuminate/support": "5.0.*",
-        "predis/predis": "~1.0"
+        "illuminate/support": "4.2.*",
+        "predis/predis": "0.8.*"
     },
     "autoload": {
-        "psr-4": {
-            "Illuminate\\Redis\\": ""
+        "psr-0": {
+            "Illuminate\\Redis": ""
         }
     },
+    "target-dir": "Illuminate/Redis",
     "extra": {
         "branch-alias": {
-            "dev-master": "5.0-dev"
+            "dev-master": "4.2-dev"
         }
     },
     "minimum-stability": "dev"

@@ -13,8 +13,6 @@ namespace Symfony\Component\Console;
 
 use Symfony\Component\Console\Descriptor\TextDescriptor;
 use Symfony\Component\Console\Descriptor\XmlDescriptor;
-use Symfony\Component\Console\Helper\DebugFormatterHelper;
-use Symfony\Component\Console\Helper\ProcessHelper;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\ArgvInput;
@@ -223,7 +221,7 @@ class Application
     }
 
     /**
-     * Set an input definition set to be used with this application.
+     * Set an input definition set to be used with this application
      *
      * @param InputDefinition $definition The input definition
      *
@@ -251,7 +249,24 @@ class Application
      */
     public function getHelp()
     {
-        return $this->getLongVersion();
+        $messages = array(
+            $this->getLongVersion(),
+            '',
+            '<comment>Usage:</comment>',
+            '  [options] command [arguments]',
+            '',
+            '<comment>Options:</comment>',
+        );
+
+        foreach ($this->getDefinition()->getOptions() as $option) {
+            $messages[] = sprintf('  %-29s %s %s',
+                '<info>--'.$option->getName().'</info>',
+                $option->getShortcut() ? '<info>-'.$option->getShortcut().'</info>' : '  ',
+                $option->getDescription()
+            );
+        }
+
+        return implode(PHP_EOL, $messages);
     }
 
     /**
@@ -460,10 +475,10 @@ class Application
     {
         $namespaces = array();
         foreach ($this->commands as $command) {
-            $namespaces = array_merge($namespaces, $this->extractAllNamespaces($command->getName()));
+            $namespaces[] = $this->extractNamespace($command->getName());
 
             foreach ($command->getAliases() as $alias) {
-                $namespaces = array_merge($namespaces, $this->extractAllNamespaces($alias));
+                $namespaces[] = $this->extractNamespace($alias);
             }
         }
 
@@ -708,9 +723,9 @@ class Application
                 $trace = $e->getTrace();
                 array_unshift($trace, array(
                     'function' => '',
-                    'file' => $e->getFile() !== null ? $e->getFile() : 'n/a',
-                    'line' => $e->getLine() !== null ? $e->getLine() : 'n/a',
-                    'args' => array(),
+                    'file'     => $e->getFile() != null ? $e->getFile() : 'n/a',
+                    'line'     => $e->getLine() != null ? $e->getLine() : 'n/a',
+                    'args'     => array(),
                 ));
 
                 for ($i = 0, $count = count($trace); $i < $count; $i++) {
@@ -723,20 +738,20 @@ class Application
                     $output->writeln(sprintf(' %s%s%s() at <info>%s:%s</info>', $class, $type, $function, $file, $line));
                 }
 
-                $output->writeln('');
-                $output->writeln('');
+                $output->writeln("");
+                $output->writeln("");
             }
         } while ($e = $e->getPrevious());
 
         if (null !== $this->runningCommand) {
             $output->writeln(sprintf('<info>%s</info>', sprintf($this->runningCommand->getSynopsis(), $this->getName())));
-            $output->writeln('');
-            $output->writeln('');
+            $output->writeln("");
+            $output->writeln("");
         }
     }
 
     /**
-     * Tries to figure out the terminal width in which this application runs.
+     * Tries to figure out the terminal width in which this application runs
      *
      * @return int|null
      */
@@ -748,7 +763,7 @@ class Application
     }
 
     /**
-     * Tries to figure out the terminal height in which this application runs.
+     * Tries to figure out the terminal height in which this application runs
      *
      * @return int|null
      */
@@ -760,7 +775,7 @@ class Application
     }
 
     /**
-     * Tries to figure out the terminal dimensions based on the current environment.
+     * Tries to figure out the terminal dimensions based on the current environment
      *
      * @return array Array containing width and height
      */
@@ -770,7 +785,7 @@ class Application
             return $this->terminalDimensions;
         }
 
-        if ('\\' === DIRECTORY_SEPARATOR) {
+        if (defined('PHP_WINDOWS_VERSION_BUILD')) {
             // extract [w, H] from "wxh (WxH)"
             if (preg_match('/^(\d+)x\d+ \(\d+x(\d+)\)$/', trim(getenv('ANSICON')), $matches)) {
                 return array((int) $matches[1], (int) $matches[2]);
@@ -800,8 +815,8 @@ class Application
      *
      * Can be useful to force terminal dimensions for functional tests.
      *
-     * @param int $width  The width
-     * @param int $height The height
+     * @param int     $width  The width
+     * @param int     $height The height
      *
      * @return Application The current application
      */
@@ -828,9 +843,9 @@ class Application
 
         if (true === $input->hasParameterOption(array('--no-interaction', '-n'))) {
             $input->setInteractive(false);
-        } elseif (function_exists('posix_isatty') && $this->getHelperSet()->has('question')) {
-            $inputStream = $this->getHelperSet()->get('question')->getInputStream();
-            if (!@posix_isatty($inputStream) && false === getenv('SHELL_INTERACTIVE')) {
+        } elseif (function_exists('posix_isatty') && $this->getHelperSet()->has('dialog')) {
+            $inputStream = $this->getHelperSet()->get('dialog')->getInputStream();
+            if (!@posix_isatty($inputStream)) {
                 $input->setInteractive(false);
             }
         }
@@ -877,20 +892,16 @@ class Application
         $event = new ConsoleCommandEvent($command, $input, $output);
         $this->dispatcher->dispatch(ConsoleEvents::COMMAND, $event);
 
-        if ($event->commandShouldRun()) {
-            try {
-                $exitCode = $command->run($input, $output);
-            } catch (\Exception $e) {
-                $event = new ConsoleTerminateEvent($command, $input, $output, $e->getCode());
-                $this->dispatcher->dispatch(ConsoleEvents::TERMINATE, $event);
+        try {
+            $exitCode = $command->run($input, $output);
+        } catch (\Exception $e) {
+            $event = new ConsoleTerminateEvent($command, $input, $output, $e->getCode());
+            $this->dispatcher->dispatch(ConsoleEvents::TERMINATE, $event);
 
-                $event = new ConsoleExceptionEvent($command, $input, $output, $e, $event->getExitCode());
-                $this->dispatcher->dispatch(ConsoleEvents::EXCEPTION, $event);
+            $event = new ConsoleExceptionEvent($command, $input, $output, $e, $event->getExitCode());
+            $this->dispatcher->dispatch(ConsoleEvents::EXCEPTION, $event);
 
-                throw $event->getException();
-            }
-        } else {
-            $exitCode = ConsoleCommandEvent::RETURN_CODE_DISABLED;
+            throw $event->getException();
         }
 
         $event = new ConsoleTerminateEvent($command, $input, $output, $exitCode);
@@ -921,13 +932,13 @@ class Application
         return new InputDefinition(array(
             new InputArgument('command', InputArgument::REQUIRED, 'The command to execute'),
 
-            new InputOption('--help',           '-h', InputOption::VALUE_NONE, 'Display this help message'),
-            new InputOption('--quiet',          '-q', InputOption::VALUE_NONE, 'Do not output any message'),
-            new InputOption('--verbose',        '-v|vv|vvv', InputOption::VALUE_NONE, 'Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug'),
-            new InputOption('--version',        '-V', InputOption::VALUE_NONE, 'Display this application version'),
-            new InputOption('--ansi',           '',   InputOption::VALUE_NONE, 'Force ANSI output'),
-            new InputOption('--no-ansi',        '',   InputOption::VALUE_NONE, 'Disable ANSI output'),
-            new InputOption('--no-interaction', '-n', InputOption::VALUE_NONE, 'Do not ask any interactive question'),
+            new InputOption('--help',           '-h', InputOption::VALUE_NONE, 'Display this help message.'),
+            new InputOption('--quiet',          '-q', InputOption::VALUE_NONE, 'Do not output any message.'),
+            new InputOption('--verbose',        '-v|vv|vvv', InputOption::VALUE_NONE, 'Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug.'),
+            new InputOption('--version',        '-V', InputOption::VALUE_NONE, 'Display this application version.'),
+            new InputOption('--ansi',           '',   InputOption::VALUE_NONE, 'Force ANSI output.'),
+            new InputOption('--no-ansi',        '',   InputOption::VALUE_NONE, 'Disable ANSI output.'),
+            new InputOption('--no-interaction', '-n', InputOption::VALUE_NONE, 'Do not ask any interactive question.'),
         ));
     }
 
@@ -953,14 +964,12 @@ class Application
             new DialogHelper(),
             new ProgressHelper(),
             new TableHelper(),
-            new DebugFormatterHelper(),
-            new ProcessHelper(),
             new QuestionHelper(),
         ));
     }
 
     /**
-     * Runs and parses stty -a if it's available, suppressing any error output.
+     * Runs and parses stty -a if it's available, suppressing any error output
      *
      * @return string
      */
@@ -983,7 +992,7 @@ class Application
     }
 
     /**
-     * Runs and parses mode CON if it's available, suppressing any error output.
+     * Runs and parses mode CON if it's available, suppressing any error output
      *
      * @return string <width>x<height> or null if it could not be parsed
      */
@@ -1039,10 +1048,10 @@ class Application
 
     /**
      * Finds alternative of $name among $collection,
-     * if nothing is found in $collection, try in $abbrevs.
+     * if nothing is found in $collection, try in $abbrevs
      *
-     * @param string             $name       The string
-     * @param array|\Traversable $collection The collection
+     * @param string               $name       The string
+     * @param array|\Traversable   $collection The collection
      *
      * @return array A sorted array of similar string
      */
@@ -1145,29 +1154,5 @@ class Application
         mb_convert_variables($encoding, 'utf8', $lines);
 
         return $lines;
-    }
-
-    /**
-     * Returns all namespaces of the command name.
-     *
-     * @param string $name The full name of the command
-     *
-     * @return array The namespaces of the command
-     */
-    private function extractAllNamespaces($name)
-    {
-        // -1 as third argument is needed to skip the command short name when exploding
-        $parts = explode(':', $name, -1);
-        $namespaces = array();
-
-        foreach ($parts as $part) {
-            if (count($namespaces)) {
-                $namespaces[] = end($namespaces).':'.$part;
-            } else {
-                $namespaces[] = $part;
-            }
-        }
-
-        return $namespaces;
     }
 }

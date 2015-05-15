@@ -11,6 +11,8 @@
 
 namespace Symfony\Component\Security\Core\Tests\Authentication;
 
+use Symfony\Component\Security\Core\Authentication\Token\AnonymousToken;
+use Symfony\Component\Security\Core\Authentication\Token\RememberMeToken;
 use Symfony\Component\Security\Core\Authentication\AuthenticationTrustResolver;
 
 class AuthenticationTrustResolverTest extends \PHPUnit_Framework_TestCase

@@ -26,25 +26,24 @@ use Symfony\Component\Process\Exception\RuntimeException;
  */
 class PhpProcess extends Process
 {
+    private $executableFinder;
+
     /**
      * Constructor.
      *
-     * @param string $script  The PHP script to run (as a string)
-     * @param string $cwd     The working directory
-     * @param array  $env     The environment variables
-     * @param int    $timeout The timeout in seconds
-     * @param array  $options An array of options for proc_open
+     * @param string  $script  The PHP script to run (as a string)
+     * @param string  $cwd     The working directory
+     * @param array   $env     The environment variables
+     * @param int     $timeout The timeout in seconds
+     * @param array   $options An array of options for proc_open
      *
      * @api
      */
     public function __construct($script, $cwd = null, array $env = array(), $timeout = 60, array $options = array())
     {
-        $executableFinder = new PhpExecutableFinder();
-        if (false === $php = $executableFinder->find()) {
-            $php = null;
-        }
+        parent::__construct(null, $cwd, $env, $script, $timeout, $options);
 
-        parent::__construct($php, $cwd, $env, $script, $timeout, $options);
+        $this->executableFinder = new PhpExecutableFinder();
     }
 
     /**
@@ -63,7 +62,10 @@ class PhpProcess extends Process
     public function start($callback = null)
     {
         if (null === $this->getCommandLine()) {
-            throw new RuntimeException('Unable to find the PHP executable.');
+            if (false === $php = $this->executableFinder->find()) {
+                throw new RuntimeException('Unable to find the PHP executable.');
+            }
+            $this->setCommandLine($php);
         }
 
         parent::start($callback);

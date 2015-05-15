@@ -2,6 +2,7 @@
 
 use Illuminate\Foundation\Composer;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Foundation\Console\AutoloadCommand;
 
 class ComposerServiceProvider extends ServiceProvider {
 
@@ -19,10 +20,17 @@ class ComposerServiceProvider extends ServiceProvider {
 	 */
 	public function register()
 	{
-		$this->app->singleton('composer', function($app)
+		$this->app->bindShared('composer', function($app)
 		{
-			return new Composer($app['files'], $app->basePath());
+			return new Composer($app['files'], $app['path.base']);
 		});
+
+		$this->app->bindShared('command.dump-autoload', function($app)
+		{
+			return new AutoloadCommand($app['composer']);
+		});
+
+		$this->commands('command.dump-autoload');
 	}
 
 	/**
@@ -32,7 +40,7 @@ class ComposerServiceProvider extends ServiceProvider {
 	 */
 	public function provides()
 	{
-		return array('composer');
+		return array('composer', 'command.dump-autoload');
 	}
 
 }

@@ -61,19 +61,18 @@ class DebugClassLoaderTest extends \PHPUnit_Framework_TestCase
 
     public function testUnsilencing()
     {
-        if (PHP_VERSION_ID >= 70000) {
-            $this->markTestSkipped('PHP7 throws exceptions, unsilencing is not required anymore.');
-        }
-
         ob_start();
-
-        $this->iniSet('log_errors', 0);
-        $this->iniSet('display_errors', 1);
+        $bak = array(
+            ini_set('log_errors', 0),
+            ini_set('display_errors', 1),
+        );
 
         // See below: this will fail with parse error
         // but this should not be @-silenced.
         @class_exists(__NAMESPACE__.'\TestingUnsilencing', true);
 
+        ini_set('log_errors', $bak[0]);
+        ini_set('display_errors', $bak[1]);
         $output = ob_get_clean();
 
         $this->assertStringMatchesFormat('%aParse error%a', $output);
@@ -104,19 +103,14 @@ class DebugClassLoaderTest extends \PHPUnit_Framework_TestCase
             // if an exception is thrown, the test passed
             restore_error_handler();
             restore_exception_handler();
+            $this->assertEquals(E_STRICT, $exception->getSeverity());
             $this->assertStringStartsWith(__FILE__, $exception->getFile());
-            if (PHP_VERSION_ID < 70000) {
-                $this->assertRegexp('/^Runtime Notice: Declaration/', $exception->getMessage());
-                $this->assertEquals(E_STRICT, $exception->getSeverity());
-            } else {
-                $this->assertRegexp('/^Warning: Declaration/', $exception->getMessage());
-                $this->assertEquals(E_WARNING, $exception->getSeverity());
-            }
-        } catch (\Exception $exception) {
+            $this->assertRegexp('/^Runtime Notice: Declaration/', $exception->getMessage());
+        } catch (\Exception $e) {
             restore_error_handler();
             restore_exception_handler();
 
-            throw $exception;
+            throw $e;
         }
     }
 

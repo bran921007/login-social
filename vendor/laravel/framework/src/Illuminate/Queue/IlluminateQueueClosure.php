@@ -1,23 +1,23 @@
 <?php
 
-use Illuminate\Contracts\Encryption\Encrypter as EncrypterContract;
+use Illuminate\Encryption\Encrypter;
 
 class IlluminateQueueClosure {
 
 	/**
 	 * The encrypter instance.
 	 *
-	 * @var \Illuminate\Contracts\Encryption\Encrypter
+	 * @var \Illuminate\Encryption\Encrypter  $crypt
 	 */
 	protected $crypt;
 
 	/**
 	 * Create a new queued Closure job.
 	 *
-	 * @param  \Illuminate\Contracts\Encryption\Encrypter  $crypt
+	 * @param  \Illuminate\Encryption\Encrypter  $crypt
 	 * @return void
 	 */
-	public function __construct(EncrypterContract $crypt)
+	public function __construct(Encrypter $crypt)
 	{
 		$this->crypt = $crypt;
 	}
@@ -25,7 +25,7 @@ class IlluminateQueueClosure {
 	/**
 	 * Fire the Closure based queue job.
 	 *
-	 * @param  \Illuminate\Contracts\Queue\Job  $job
+	 * @param  \Illuminate\Queue\Jobs\Job  $job
 	 * @param  array  $data
 	 * @return void
 	 */

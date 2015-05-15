@@ -1,8 +1,6 @@
 <?php namespace Illuminate\Auth;
 
-use Illuminate\Contracts\Auth\Authenticatable as UserContract;
-
-class GenericUser implements UserContract {
+class GenericUser implements UserInterface {
 
 	/**
 	 * All of the user's attributes.

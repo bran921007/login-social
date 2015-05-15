@@ -1,16 +1,11 @@
 <?php
 
-namespace PhpParser\Node\Expr;
-
-use PhpParser\Node\Expr;
-
-class ClosureUse extends Expr
+/**
+ * @property string $var   Name of variable
+ * @property bool   $byRef Whether to use by reference
+ */
+class PHPParser_Node_Expr_ClosureUse extends PHPParser_Node_Expr
 {
-    /** @var string Name of variable */
-    public $var;
-    /** @var bool Whether to use by reference */
-    public $byRef;
-
     /**
      * Constructs a closure use node.
      *
@@ -19,12 +14,12 @@ class ClosureUse extends Expr
      * @param array       $attributes Additional attributes
      */
     public function __construct($var, $byRef = false, array $attributes = array()) {
-        parent::__construct(null, $attributes);
-        $this->var = $var;
-        $this->byRef = $byRef;
-    }
-
-    public function getSubNodeNames() {
-        return array('var', 'byRef');
+        parent::__construct(
+            array(
+                'var'   => $var,
+                'byRef' => $byRef
+            ),
+            $attributes
+        );
     }
 }

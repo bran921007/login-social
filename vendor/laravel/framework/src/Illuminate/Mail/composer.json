@@ -1,12 +1,6 @@
 {
     "name": "illuminate/mail",
-    "description": "The Illuminate Mail package.",
     "license": "MIT",
-    "homepage": "http://laravel.com",
-    "support": {
-        "issues": "https://github.com/laravel/framework/issues",
-        "source": "https://github.com/laravel/framework"
-    },
     "authors": [
         {
             "name": "Taylor Otwell",
@@ -15,25 +9,25 @@
     ],
     "require": {
         "php": ">=5.4.0",
-        "illuminate/container": "5.0.*",
-        "illuminate/contracts": "5.0.*",
-        "illuminate/support": "5.0.*",
-        "psr/log": "~1.0",
+        "illuminate/container": "4.2.*",
+        "illuminate/log": "4.2.*",
+        "illuminate/support": "4.2.*",
+        "illuminate/view": "4.2.*",
         "swiftmailer/swiftmailer": "~5.1"
     },
+    "require-dev": {
+        "illuminate/queue": "4.2.*"
+    },
     "autoload": {
-        "psr-4": {
-            "Illuminate\\Mail\\": ""
+        "psr-0": {
+            "Illuminate\\Mail": ""
         }
     },
+    "target-dir": "Illuminate/Mail",
     "extra": {
         "branch-alias": {
-            "dev-master": "5.0-dev"
+            "dev-master": "4.2-dev"
         }
-    },
-    "suggest": {
-        "aws/aws-sdk-php": "Required to use the SES mail driver (~2.4).",
-        "guzzlehttp/guzzle": "Required to use the Mailgun and Mandrill mail drivers (~5.0)."
     },
     "minimum-stability": "dev"
 }

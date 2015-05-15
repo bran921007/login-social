@@ -1,8 +1,8 @@
 <?php namespace Illuminate\Queue\Console;
 
 use Illuminate\Queue\Worker;
+use Illuminate\Queue\Jobs\Job;
 use Illuminate\Console\Command;
-use Illuminate\Contracts\Queue\Job;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
 
@@ -23,9 +23,9 @@ class WorkCommand extends Command {
 	protected $description = 'Process the next job on a queue';
 
 	/**
-	 * The queue worker instance.
+	 * The queue listener instance.
 	 *
-	 * @var \Illuminate\Queue\Worker
+	 * @var \Illuminate\Queue\Listener
 	 */
 	protected $worker;
 
@@ -91,9 +91,7 @@ class WorkCommand extends Command {
 		{
 			$this->worker->setCache($this->laravel['cache']->driver());
 
-			$this->worker->setDaemonExceptionHandler(
-				$this->laravel['Illuminate\Contracts\Debug\ExceptionHandler']
-			);
+			$this->worker->setDaemonExceptionHandler($this->laravel['exception']);
 
 			return $this->worker->daemon(
 				$connection, $queue, $delay, $memory,
@@ -110,7 +108,7 @@ class WorkCommand extends Command {
 	/**
 	 * Write the status output for the queue worker.
 	 *
-	 * @param  \Illuminate\Contracts\Queue\Job  $job
+	 * @param  \Illuminate\Queue\Jobs\Job  $job
 	 * @param  bool  $failed
 	 * @return void
 	 */

@@ -1,14 +1,10 @@
 <?php
 
-namespace PhpParser\Node\Scalar;
-
-use PhpParser\Node\Scalar;
-
-class Encapsed extends Scalar
+/**
+ * @property array $parts Encaps list
+ */
+class PHPParser_Node_Scalar_Encapsed extends PHPParser_Node_Scalar
 {
-    /** @var array Encaps list */
-    public $parts;
-
     /**
      * Constructs an encapsed string node.
      *
@@ -16,11 +12,11 @@ class Encapsed extends Scalar
      * @param array $attributes Additional attributes
      */
     public function __construct(array $parts = array(), array $attributes = array()) {
-        parent::__construct(null, $attributes);
-        $this->parts = $parts;
-    }
-
-    public function getSubNodeNames() {
-        return array('parts');
+        parent::__construct(
+            array(
+                'parts' => $parts
+            ),
+            $attributes
+        );
     }
 }

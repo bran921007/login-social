@@ -1,7 +1,6 @@
 <?php namespace Illuminate\View\Engines;
 
 use Closure;
-use InvalidArgumentException;
 
 class EngineResolver {
 
@@ -30,8 +29,6 @@ class EngineResolver {
 	 */
 	public function register($engine, Closure $resolver)
 	{
-		unset($this->resolved[$engine]);
-
 		$this->resolvers[$engine] = $resolver;
 	}
 
@@ -54,7 +51,7 @@ class EngineResolver {
 			return $this->resolved[$engine] = call_user_func($this->resolvers[$engine]);
 		}
 
-		throw new InvalidArgumentException("Engine $engine not found.");
+		throw new \InvalidArgumentException("Engine $engine not found.");
 	}
 
 }

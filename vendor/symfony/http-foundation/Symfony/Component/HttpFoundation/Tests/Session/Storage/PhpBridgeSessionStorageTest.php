@@ -22,7 +22,6 @@ use Symfony\Component\HttpFoundation\Session\Attribute\AttributeBag;
  * These tests require separate processes.
  *
  * @runTestsInSeparateProcesses
- * @preserveGlobalState disabled
  */
 class PhpBridgeSessionStorageTest extends \PHPUnit_Framework_TestCase
 {
@@ -30,8 +29,8 @@ class PhpBridgeSessionStorageTest extends \PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        $this->iniSet('session.save_handler', 'files');
-        $this->iniSet('session.save_path', $this->savePath = sys_get_temp_dir().'/sf2test');
+        ini_set('session.save_handler', 'files');
+        ini_set('session.save_path', $this->savePath = sys_get_temp_dir().'/sf2test');
         if (!is_dir($this->savePath)) {
             mkdir($this->savePath);
         }
@@ -61,7 +60,7 @@ class PhpBridgeSessionStorageTest extends \PHPUnit_Framework_TestCase
 
     public function testPhpSession53()
     {
-        if (PHP_VERSION_ID >= 50400) {
+        if (version_compare(phpversion(), '5.4.0', '>=')) {
             $this->markTestSkipped('Test skipped, for PHP 5.3 only.');
         }
 
@@ -85,7 +84,7 @@ class PhpBridgeSessionStorageTest extends \PHPUnit_Framework_TestCase
 
     public function testPhpSession54()
     {
-        if (PHP_VERSION_ID < 50400) {
+        if (version_compare(phpversion(), '5.4.0', '<')) {
             $this->markTestSkipped('Test skipped, for PHP 5.4 only.');
         }
 

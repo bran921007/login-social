@@ -1,14 +1,10 @@
 <?php
 
-namespace PhpParser\Node;
-
-use PhpParser\NodeAbstract;
-
-class Name extends NodeAbstract
+/**
+ * @property array $parts Parts of the name
+ */
+class PHPParser_Node_Name extends PHPParser_NodeAbstract
 {
-    /** @var string[] Parts of the name */
-    public $parts;
-
     /**
      * Constructs a name node.
      *
@@ -20,12 +16,12 @@ class Name extends NodeAbstract
             $parts = explode('\\', $parts);
         }
 
-        parent::__construct(null, $attributes);
-        $this->parts = $parts;
-    }
-
-    public function getSubNodeNames() {
-        return array('parts');
+        parent::__construct(
+            array(
+                'parts' => $parts,
+            ),
+            $attributes
+        );
     }
 
     /**
@@ -165,7 +161,7 @@ class Name extends NodeAbstract
             return $name->parts;
         }
 
-        throw new \InvalidArgumentException(
+        throw new InvalidArgumentException(
             'When changing a name you need to pass either a string, an array or a Name node'
         );
     }

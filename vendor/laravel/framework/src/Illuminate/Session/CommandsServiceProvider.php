@@ -18,9 +18,9 @@ class CommandsServiceProvider extends ServiceProvider {
 	 */
 	public function register()
 	{
-		$this->app->singleton('command.session.database', function($app)
+		$this->app->bindShared('command.session.database', function($app)
 		{
-			return new Console\SessionTableCommand($app['files'], $app['composer']);
+			return new Console\SessionTableCommand($app['files']);
 		});
 
 		$this->commands('command.session.database');

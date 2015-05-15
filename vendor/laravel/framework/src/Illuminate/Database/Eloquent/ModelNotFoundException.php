@@ -1,8 +1,6 @@
 <?php namespace Illuminate\Database\Eloquent;
 
-use RuntimeException;
-
-class ModelNotFoundException extends RuntimeException {
+class ModelNotFoundException extends \RuntimeException {
 
 	/**
 	 * Name of the affected Eloquent model.
