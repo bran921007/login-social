@@ -77,7 +77,8 @@ class AuthController extends \BaseController
         // $hauth = new Hybrid_Auth(app_path() . '/config/fb_auth.php');
         //You can use any of the one provider to get the variable, I am using google
         //this is important to do, as it clears out the cookie
-        $hauth=new Hybrid_auth(app_path().'/config/google_auth.php');
+//        $hauth=new Hybrid_auth(app_path().'/config/google_auth.php');
+        $hauth = new Hybrid_Auth(app_path() . '/config/twitterAuth.php');
         $hauth->logoutAllProviders();
         return View::make('login');
 
