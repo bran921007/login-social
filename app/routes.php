@@ -1,27 +1,9 @@
 <?php
 
-/*
-|--------------------------------------------------------------------------
-| Application Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register all of the routes for an application.
-| It's a breeze. Simply tell Laravel the URIs it should respond to
-| and give it the Closure to execute when that URI is requested.
-|
-*/
+use Illuminate\Support\Facades\Route;
 
-Route::get('/', function()
-{
-	return View::make('login');
-});
-
-Route::get('twitterAuth/{auth?}',array('as'=>'twitterAuth','uses'=>'AuthController@getTwitterLogin'));
-
-Route::get('fbauth/{auth?}',array('as'=>'facebookAuth','uses'=>'AuthController@getFacebookLogin'));
-
-
-Route::get('gauth/{auth?}',array('as'=>'googleAuth','uses'=>'AuthController@getGoogleLogin'));
-
-
-Route::get('logout',array('as'=>'logout','uses'=>'AuthController@getLoggedOut'));
+Route::get('/', fn () => view('login'));
+Route::get('twitterAuth/{auth?}', [AuthController::class, 'getTwitterLogin'])->where('auth', 'auth')->name('twitterAuth');
+Route::get('fbauth/{auth?}', [AuthController::class, 'getFacebookLogin'])->where('auth', 'auth')->name('facebookAuth');
+Route::get('gauth/{auth?}', [AuthController::class, 'getGoogleLogin'])->where('auth', 'auth')->name('googleAuth');
+Route::get('logout', [AuthController::class, 'getLoggedOut'])->name('logout');

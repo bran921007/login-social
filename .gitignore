@@ -2,7 +2,6 @@
 /vendor
 *vendor*
 composer.phar
-composer.lock
 .env.*.php
 .env.php
 .env
@@ -10,3 +9,7 @@ composer.lock
 Thumbs.db
 
 tests/_output/*
+
+/.env
+/.phpunit.cache
+/vendor-runtime/

@@ -1,25 +1,9 @@
-## Laravel PHP Framework
+# Social login
 
-[![Build Status](https://travis-ci.org/laravel/framework.svg)](https://travis-ci.org/laravel/framework)
-[![Total Downloads](https://poser.pugx.org/laravel/framework/downloads.svg)](https://packagist.org/packages/laravel/framework)
-[![Latest Stable Version](https://poser.pugx.org/laravel/framework/v/stable.svg)](https://packagist.org/packages/laravel/framework)
-[![Latest Unstable Version](https://poser.pugx.org/laravel/framework/v/unstable.svg)](https://packagist.org/packages/laravel/framework)
-[![License](https://poser.pugx.org/laravel/framework/license.svg)](https://packagist.org/packages/laravel/framework)
+Requires PHP 8.2.35+ (or approved patch lines 8.3.36+, 8.4.27+, 8.5.12+), maintained Laravel 12 and HybridAuth 3.13. Install with `composer install`, copy `.env.example` to `.env`, configure OAuth credentials and public HTTPS `APP_URL`, then `php artisan key:generate`. Serve only `public/`. All HTTP, console and test entrypoints use `vendor-runtime/`; the tracked `vendor/` is an inactive historical snapshot and must not be loaded or served.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable, creative experience to be truly fulfilling. Laravel attempts to take the pain out of development by easing common tasks used in the majority of web projects, such as authentication, routing, sessions, and caching.
+The Google, Facebook and Twitter links and optional `/auth` callbacks retain their original paths. Register `/gauth/auth`, `/fbauth/auth` and `/twitterAuth/auth` with providers or set explicit redirect URI variables. Twitter retains OAuth1.0a through the maintained HybridAuth adapter. Provider scopes, API entitlements and callback registration still require valid provider accounts/configuration.
 
-Laravel aims to make the development process a pleasing one for the developer without sacrificing application functionality. Happy developers make the best code. To this end, we've attempted to combine the very best of what we have seen in other web frameworks, including frameworks implemented in other languages, such as Ruby on Rails, ASP.NET MVC, and Sinatra.
+HybridAuth 3 replaces its removed v2 endpoint API. A session storage adapter retains OAuth state/tokens on the server in Laravel sessions; redirects return through Laravel to persist that state. Logout clears the complete OAuth session. Access tokens are never rendered. Missing credentials return503; declined/invalid state returns400; provider failures return generic502. No app user or database schema is created. Plan a new app key/session cutover from Laravel4; `SESSION_SECURE_COOKIE=false` is only for local HTTP.
 
-Laravel is accessible, yet powerful, providing powerful tools needed for large, robust applications. A superb inversion of control container, expressive migration system, and tightly integrated unit testing support give you the tools you need to build any application with which you are tasked.
-
-## Official Documentation
-
-Documentation for the entire framework can be found on the [Laravel website](http://laravel.com/docs).
-
-### Contributing To Laravel
-
-**All issues and pull requests should be filed on the [laravel/framework](http://github.com/laravel/framework) repository.**
-
-### License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](http://opensource.org/licenses/MIT)
+Run `composer test` for links, genuine Google/Facebook redirect construction and state checks, real HybridAuth Google and Twitter callbacks through in-memory HTTP transports, missing configuration, logout and session-storage behavior. Tests use no provider credentials or network; actual provider authorization and live account compatibility remain unverified. No VPS, merge or deployment operation is included.
