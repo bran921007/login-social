@@ -1,90 +1,75 @@
 <?php
 
-class AuthController extends \BaseController
+use App\Auth\HybridSessionStorage;
+use Hybridauth\Exception\InvalidAuthorizationStateException;
+use Hybridauth\HttpClient\HttpClientInterface;
+use Hybridauth\HttpClient\Util;
+use Hybridauth\Hybridauth;
+use Illuminate\Http\Request;
+
+class AuthController extends BaseController
 {
-
-    public function getTwitterLogin($auth=NULL)
+    public function getTwitterLogin(Request $request, ?string $auth = null)
     {
-        if ($auth == 'auth')
-        {
-            Hybrid_Endpoint::process();
-            return;
-        }
-        try
-        {
-            $oauth = new Hybrid_Auth(app_path(). '/config/twitterAuth.php');
-            $provider = $oauth->authenticate('Twitter');
-            $profile = $provider->getUserProfile();
-        }
-        catch(Exception $e)
-        {
-            return $e->getMessage();
-        }
-
-        return var_dump($profile).'<a href="logout">Log Out</a>';
-
+        return $this->signIn($request, 'Twitter', 'twitterAuth');
     }
 
-    //this is the code for facebook Login
-    public function getFacebookLogin($auth=NULL)
+    public function getFacebookLogin(Request $request, ?string $auth = null)
     {
-        if ($auth == 'auth')
-        {
-            try
-            {
-                Hybrid_Endpoint::process();
-            }
-            catch (Exception $e)
-            {
-                return Redirect::to('fbauth');
-            }
-            return;
-        }
-
-        $oauth = new Hybrid_Auth(app_path(). '/config/fb_auth.php');
-        $provider = $oauth->authenticate('Facebook');
-        $profile = $provider->getUserProfile();
-        return var_dump($profile).'<a href="logout">Log Out</a>';
+        return $this->signIn($request, 'Facebook', 'facebookAuth');
     }
 
-    //this is the method that will handle the Google Login
-
-    public function getGoogleLogin($auth=NULL)
+    public function getGoogleLogin(Request $request, ?string $auth = null)
     {
-        if ($auth == 'auth')
-        {
-             Hybrid_Endpoint::process();
+        return $this->signIn($request, 'Google', 'googleAuth');
+    }
 
-        }
+    private function signIn(Request $request, string $provider, string $route)
+    {
+        $name = strtolower($provider);
+        $id = config("services.$name.client_id");
+        $secret = config("services.$name.client_secret");
+        abort_unless($id && $secret, 503, 'Social login is not configured.');
+        abort_if($request->has('error') || $request->has('denied'), 400, 'Social login was declined.');
+        $storage = new HybridSessionStorage($request->session());
+        $hybrid = new Hybridauth([
+            'callback' => config("services.$name.redirect") ?: route($route, ['auth' => 'auth']),
+            'providers' => [$provider => ['enabled' => true, 'keys' => ['id' => $id, 'key' => $id, 'secret' => $secret]]],
+        ], app(HttpClientInterface::class), $storage);
+
+        // Return redirects through Laravel so session state is saved before the response is sent.
+        $redirect = null;
+        Util::setRedirectHandler(function ($url) use (&$redirect): void {
+            $redirect = redirect()->away($url);
+        });
         try {
-            $oauth = new Hybrid_Auth(app_path() . '/config/google_auth.php');
-            $provider = $oauth->authenticate('Google');
-            $profile = $provider->getUserProfile();
-        }
-        catch(exception $e)
-        {
-            return $e->getMessage();
+            $adapter = $hybrid->authenticate($provider);
+            if ($redirect !== null) {
+                return $redirect;
+            }
+            $profile = $adapter->getUserProfile();
+        } catch (InvalidAuthorizationStateException $exception) {
+            abort(400, 'The social login session has expired. Please try again.');
+        } catch (Throwable $exception) {
+            abort(502, 'The social login provider could not complete the request.');
+        } finally {
+            Util::setRedirectHandler(null);
         }
 
-        return $profile->email.'<a href="logout">Log Out</a>';
-
+        $storage->delete($provider.'.authorization_state');
+        $request->session()->regenerate();
+        $request->session()->put('social_profile', [
+            'provider' => $name, 'id' => $profile->identifier,
+            'name' => $profile->displayName, 'email' => $profile->email,
+        ]);
+        return response(e($name === 'google' ? $profile->email : $profile->displayName).'<a href="'.e(route('logout')).'">Log Out</a>');
     }
 
-
-    public function getLoggedOut()
+    public function getLoggedOut(Request $request)
     {
-        // $hauth = new Hybrid_Auth(app_path() . '/config/twitterAuth.php');
-        // $hauth = new Hybrid_Auth(app_path() . '/config/fb_auth.php');
-        //You can use any of the one provider to get the variable, I am using google
-        //this is important to do, as it clears out the cookie
-//        $hauth=new Hybrid_auth(app_path().'/config/google_auth.php');
-        $hauth = new Hybrid_Auth(app_path() . '/config/twitterAuth.php');
-        $hauth->logoutAllProviders();
-        return View::make('login');
-
+        (new HybridSessionStorage($request->session()))->clear();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        return view('login');
     }
-
-
-
-
 }
